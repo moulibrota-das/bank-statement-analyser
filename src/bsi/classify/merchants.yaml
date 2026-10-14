@@ -1,0 +1,30 @@
+# Deterministic keyword map. Matching is done on the normalized counterparty key and the
+# lower-cased narration. First matching entry wins; `ambiguous` keys are deliberately
+# left unresolved so the LLM (or recurring evidence) decides.
+merchants:
+  Food:
+    [swiggy, zomato, bigbasket, zepto, blinkit, dominos, mcdonald, starbucks, kfc, burger king,
+     pizza, restaurant, cafe, instamart, eatfit, faasos]
+  Shopping:
+    [flipkart, myntra, ajio, nykaa, meesho, croma, amazon pay, amazon seller, amzn, reliance digital, decathlon, ikea]
+  Travel:
+    [irctc, uber, ola cabs, olacabs, makemytrip, redbus, goibibo, cleartrip, indigo, air india, vistara,
+     yatra, rapido, fastag, metro]
+  Utilities:
+    [bescom, airtel, jio, bsnl, vodafone, tata power, mseb, tneb, bwssb, water board, electricity,
+     broadband, piped gas, indane, mahanagar gas, act fibernet, hathway]
+
+# keyword -> category, applied by direction
+keywords:
+  credit:
+    Salary: ["salary", "sal cr", "payroll", "wages"]
+  debit:
+    Rent: ["rent"]
+    Other: ["chq rtn chg", "cheque return", "return charges", "penalty", "bounce", "dishonour"]
+
+# counterparty keys that must NOT be resolved by merchant keywords (need context)
+ambiguous: ["amazon"]
+
+# channel-level fallbacks (category, confidence)
+channel_rules:
+  ATM: [Transfers, 0.80]
