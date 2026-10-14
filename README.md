@@ -98,15 +98,15 @@ masked in every response.
 
 ```bash
 make install            # venv + dependencies (Python 3.11+)
-cp .env.example .env    # optional: add ANTHROPIC_API_KEY; with no key everything runs in offline mock mode
+cp .env.example .env    # optional: add GEMINI_API_KEY; with no key everything runs in offline mock mode
 make data               # (re)generate the synthetic statements; already committed
 ```
 
 | Env var | Purpose | Default |
 |---|---|---|
-| `ANTHROPIC_API_KEY` | Enables the live LLM; empty = mock mode | empty |
+| `GEMINI_API_KEY` (or `GOOGLE_API_KEY`) | Enables the live LLM; empty = mock mode | empty |
 | `BSI_MOCK` | Force mock (`1`) or live (`0`) | auto |
-| `BSI_LLM_MODEL` | Model id | `claude-sonnet-5-5` |
+| `BSI_LLM_MODEL` | Gemini model id (check it is available to your key) | `gemini-2.5-flash` |
 | `BSI_CLASSIFY_PROMPT` / `BSI_SUMMARY_PROMPT` | Prompt versions | `classify_v4` / `summary_v2` |
 | `BSI_MAX_UPLOAD_MB`, `BSI_CORS_ORIGINS` | API limits / CORS | `10`, `http://localhost:8501` |
 | `API_BASE_URL` | UI → API address | `http://localhost:8000` |
@@ -145,7 +145,7 @@ Reconciliation: PASSED
 make test        # 200+ pytest tests, all offline (mock LLM)
 make lint        # ruff
 make eval        # offline mock run -> eval/results.md
-make eval-live   # real model; needs ANTHROPIC_API_KEY
+make eval-live   # real model; needs GEMINI_API_KEY
 ```
 
 ### Results (mock mode, 6 synthetic statements, 273 transactions)
@@ -179,7 +179,7 @@ compares them. v1 naive free text → v2 fixed list + JSON schema → v3 few-sho
 
 **API on Render** (Railway is analogous):
 1. New *Web Service* from this repo, runtime *Docker*, Dockerfile path `Dockerfile.api`.
-2. Env vars: `ANTHROPIC_API_KEY` (omit for mock mode), `BSI_CORS_ORIGINS=https://<your-app>.streamlit.app`.
+2. Env vars: `GEMINI_API_KEY` (omit for mock mode), `BSI_CORS_ORIGINS=https://<your-app>.streamlit.app`.
 3. The container listens on `$PORT`; health check path `/health`.
 
 **UI on Streamlit Community Cloud:**
@@ -199,7 +199,7 @@ compares them. v1 naive free text → v2 fixed list + JSON schema → v3 few-sho
   precision misses in the eval).
 - The LLM cache is in-memory per run unless a path is given; entries are keyed by counterparty + direction +
   a coarse amount band.
-- The Anthropic client has been exercised only against mocks in this build, not a live endpoint.
+- The Gemini client has been exercised only against mocks in this build, not a live endpoint.
 - Uploads are processed in memory (never on disk) rather than in a temp directory.
 
 ## Future work

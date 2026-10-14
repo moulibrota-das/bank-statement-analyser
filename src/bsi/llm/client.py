@@ -1,4 +1,4 @@
-"""Thin provider-agnostic LLM client. Anthropic Claude by default; MockClient runs offline.
+"""Thin provider-agnostic LLM client. Google Gemini by default; MockClient runs offline.
 
 `complete_json` validates the reply against a pydantic model and retries once on failure."""
 from __future__ import annotations
@@ -54,24 +54,26 @@ class BaseClient:
         raise NotImplementedError
 
 
-class AnthropicClient(BaseClient):
-    name = "anthropic"
+class GeminiClient(BaseClient):
+    name = "gemini"
 
-    def __init__(self, api_key: str, model: str, max_tokens: int = 2048) -> None:
+    def __init__(self, api_key: str, model: str, max_tokens: int = 4096) -> None:
         super().__init__()
-        import anthropic
+        from google import genai
 
-        self._client = anthropic.Anthropic(api_key=api_key)
+        self._client = genai.Client(api_key=api_key)
         self.model, self.max_tokens = model, max_tokens
 
     def _complete(self, system: str, user: str, task: str) -> str:
+        from google.genai import types
+
         try:
-            msg = self._client.messages.create(
-                model=self.model, max_tokens=self.max_tokens, system=system,
-                messages=[{"role": "user", "content": user}])
-        except Exception as e:  # network/auth/rate-limit: surface uniformly
+            resp = self._client.models.generate_content(
+                model=self.model, contents=user,
+                config=types.GenerateContentConfig(system_instruction=system, max_output_tokens=self.max_tokens))
+        except Exception as e:  # network/auth/quota: surface uniformly
             raise LLMError(f"{type(e).__name__}: {e}") from e
-        return "".join(b.text for b in msg.content if getattr(b, "type", "") == "text")
+        return resp.text or ""
 
 
 Handler = Callable[[str, str, str], str]
@@ -105,7 +107,7 @@ def make_client(settings: Settings | None = None) -> BaseClient:
     s = settings or get_settings()
     if s.mock_mode:
         return MockClient()
-    return AnthropicClient(s.anthropic_api_key, s.llm_model)
+    return GeminiClient(s.gemini_api_key, s.llm_model)
 
 
 _FENCE = re.compile(r"```(?:json)?\s*(.*?)```", re.DOTALL)

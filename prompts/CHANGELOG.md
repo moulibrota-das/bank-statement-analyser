@@ -1,7 +1,7 @@
 # Prompt changelog
 
 Each version records what changed, why, and the eval score. **Scores marked TODO have not been measured
-live yet**; nothing here is invented. Run `make eval-live` (needs `ANTHROPIC_API_KEY`) to fill them in,
+live yet**; nothing here is invented. Run `make eval-live` (needs `GEMINI_API_KEY`) to fill them in,
 and `make eval` for the offline mock run, whose LLM numbers come from a heuristic stub and say nothing
 about model quality.
 

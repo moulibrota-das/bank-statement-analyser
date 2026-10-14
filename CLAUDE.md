@@ -10,7 +10,7 @@
   the LLM; do not log statement content.
 - **Never hide reconciliation mismatches or fabricate eval numbers.** Unmeasured live scores stay `TODO`.
 - The Streamlit app talks to the API over HTTP only; it must not import `bsi`.
-- Everything must run offline in mock mode (no `ANTHROPIC_API_KEY`), including all tests.
+- Everything must run offline in mock mode (no `GEMINI_API_KEY`), including all tests.
 
 ## Commands
 ```

@@ -130,6 +130,6 @@ def analyze_sample(name: str, use_llm: bool = Query(True), settings: Settings = 
 
 @router.get("/health", response_model=HealthResponse, tags=["meta"], summary="Service status")
 def health(settings: Settings = Depends(settings_dep)):
-    return HealthResponse(status="ok", version=__version__, llm_configured=bool(settings.anthropic_api_key),
+    return HealthResponse(status="ok", version=__version__, llm_configured=bool(settings.gemini_api_key),
                           mode="mock" if settings.mock_mode else "live", model=settings.llm_model,
                           classify_prompt=settings.classify_prompt)

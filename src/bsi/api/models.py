@@ -6,7 +6,7 @@ from pydantic import BaseModel, ConfigDict
 class HealthResponse(BaseModel):
     model_config = ConfigDict(json_schema_extra={
         "example": {"status": "ok", "version": "0.1.0", "llm_configured": False, "mode": "mock",
-                    "model": "claude-sonnet-5-5", "classify_prompt": "classify_v4"}})
+                    "model": "gemini-2.5-flash", "classify_prompt": "classify_v4"}})
     status: str
     version: str
     llm_configured: bool

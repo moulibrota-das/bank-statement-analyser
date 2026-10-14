@@ -20,7 +20,7 @@ test:
 eval:  ## offline mock run; writes eval/results.md
 	$(PY) eval/run_eval.py --mock --compare-prompts
 
-eval-live:  ## needs ANTHROPIC_API_KEY
+eval-live:  ## needs GEMINI_API_KEY
 	$(PY) eval/run_eval.py --live --compare-prompts
 
 lint:

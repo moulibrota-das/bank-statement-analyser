@@ -1,7 +1,7 @@
 """Evaluate the pipeline against synthetic ground truth and write eval/results.md.
 
     python eval/run_eval.py --mock          # offline; LLM numbers come from a heuristic stub
-    python eval/run_eval.py --live          # real model; needs ANTHROPIC_API_KEY
+    python eval/run_eval.py --live          # real model; needs GEMINI_API_KEY
 Nothing here is hard-coded: every number in results.md is computed by this run."""
 from __future__ import annotations
 
@@ -180,7 +180,7 @@ def main() -> None:
     args = ap.parse_args()
     settings = Settings(mock=True) if args.mock or not args.live else Settings(mock=False)
     if args.live and settings.mock_mode:
-        sys.exit("--live requires ANTHROPIC_API_KEY")
+        sys.exit("--live requires GEMINI_API_KEY")
     mock = settings.mock_mode
     client = make_client(settings)
     sts = statements()

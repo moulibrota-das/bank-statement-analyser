@@ -128,7 +128,7 @@ def test_health_in_mock_mode(client):
 
 def test_health_reports_live_mode_when_key_configured():
     app = create_app()
-    live = Settings(mock=False, ANTHROPIC_API_KEY="sk-test")
+    live = Settings(mock=False, GEMINI_API_KEY="test-key")
     app.dependency_overrides[settings_dep] = lambda: live
     h = TestClient(app).get("/health").json()
     assert h["llm_configured"] is True and h["mode"] == "live"

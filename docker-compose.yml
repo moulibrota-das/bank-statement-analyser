@@ -1,7 +1,7 @@
 services:
   api:
     build: { context: ., dockerfile: Dockerfile.api }
-    env_file: [{ path: .env, required: false }]   # ANTHROPIC_API_KEY optional: no key = mock mode
+    env_file: [{ path: .env, required: false }]   # GEMINI_API_KEY optional: no key = mock mode
     environment:
       BSI_CORS_ORIGINS: http://localhost:8501
     ports: ["8000:8000"]

@@ -13,7 +13,7 @@ anomaly flags and a faithful narrative summary.
 
 **Deterministic code** does parsing, reconciliation, totals and anomaly rules. **The LLM** only classifies
 rows the rules cannot resolve and writes the narrative from pre-computed facts. Without an
-`ANTHROPIC_API_KEY` the service runs in offline **mock mode** (see `/health`).
+`GEMINI_API_KEY` the service runs in offline **mock mode** (see `/health`).
 
 All data is synthetic in the bundled samples. Uploads are processed in memory and never stored; account
 numbers are masked to their last four digits in every response.
