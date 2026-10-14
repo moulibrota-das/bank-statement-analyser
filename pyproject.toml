@@ -8,7 +8,7 @@ version = "0.1.0"
 description = "AI-assisted bank statement analyzer: deterministic parsing, LLM only for judgment and language."
 requires-python = ">=3.11"
 dependencies = [
-  "fastapi>=0.110", "uvicorn[standard]>=0.29", "python-multipart>=0.0.9",
+  "fastapi[standard]>=0.112", "python-multipart>=0.0.9",
   "pydantic>=2.6", "pydantic-settings>=2.2",
   "pdfplumber>=0.11", "pandas>=2.2", "openpyxl>=3.1", "PyYAML>=6.0",
   "google-genai>=1.0",

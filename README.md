@@ -120,8 +120,8 @@ python -m bsi analyze statement.csv --no-llm          # rules + template only
 python -m bsi analyze statement.pdf --prompt classify_v3
 
 # API (http://localhost:8000/docs) and UI (http://localhost:8501), in two terminals
-make api
-make ui
+fastapi dev main.py        # or: uvicorn main:app --reload
+streamlit run app/streamlit_app.py   # same as: make ui
 
 # or both with Docker
 docker compose up --build

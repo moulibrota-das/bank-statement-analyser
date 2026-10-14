@@ -15,7 +15,7 @@
 ## Commands
 ```
 make install   make data   make test   make lint
-make api       # uvicorn on :8000        make ui   # streamlit on :8501
+fastapi dev main.py   # root main.py re-exports the app; same as make api        make ui   # streamlit on :8501
 make eval      # offline -> eval/results.md      make eval-live  # needs key
 python -m bsi analyze <file> --out report.json [--mock] [--no-llm] [--layout NAME] [--prompt classify_v3]
 ```

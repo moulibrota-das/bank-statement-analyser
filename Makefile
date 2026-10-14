@@ -9,7 +9,7 @@ data:  ## regenerate the synthetic statements + labels (seeded, reproducible)
 	$(PY) scripts/generate_statements.py
 
 api:
-	$(PY) -m uvicorn bsi.api.main:app --reload --port 8000
+	$(PY) -m fastapi dev main.py --port 8000
 
 ui:
 	API_BASE_URL=$${API_BASE_URL:-http://localhost:8000} $(PY) -m streamlit run app/streamlit_app.py
