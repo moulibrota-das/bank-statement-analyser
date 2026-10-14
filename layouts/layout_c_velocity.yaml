@@ -1,0 +1,18 @@
+# Fictional "Velocity Bank": amount with Dr/Cr suffix, narrations wrapped over several lines, multi-page PDF.
+name: layout_c_velocity
+bank_name: Velocity Bank
+sources: [pdf]
+amount_style: suffix
+date_formats: ["%d %b %Y"]
+wrap_gap: 11
+columns:
+  - {field: date,      header: "Txn Date",      kind: text}
+  - {field: narration, header: "Particulars",   kind: text}
+  - {field: ref,       header: "Ref",           kind: text}
+  - {field: amount,    header: "Amount (INR)",  kind: money}
+  - {field: balance,   header: "Balance (INR)", kind: money}
+noise_patterns:
+  - "^Page \\d+"
+  - "Velocity Bank"
+  - "Account Statement"
+  - "computer generated"

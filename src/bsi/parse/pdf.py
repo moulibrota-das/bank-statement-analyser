@@ -17,7 +17,7 @@ from bsi.parse.amounts import looks_like_money
 from bsi.parse.dates import DATE_RE, try_parse_date
 
 Y_TOL = 3.0
-MONEY_X_TOL = 12.0
+MONEY_X_TOL = 28.0  # wide enough for a trailing 'Dr'/'Cr' marker; money columns are far apart
 
 
 @dataclass
@@ -147,3 +147,25 @@ def extract_rows(data: bytes, layout: Layout) -> list[dict[str, str]]:
                             rows[-1][field] = _join_wrapped(rows[-1].get(field, ""), cells[field])
                     last_top = line[0].top
     return rows
+
+
+_HEADER_HINTS = [re.compile(p, re.IGNORECASE) for p in
+                 (r"date", r"narration|description|particulars|details|remarks",
+                  r"debit|credit|amount|withdraw|deposit", r"balance")]
+
+
+def guess_header_labels(data: bytes) -> list[str] | None:
+    """Find a table-header line in an unknown PDF and split it into column labels (by x-gaps)."""
+    with pdfplumber.open(io.BytesIO(data)) as pdf:
+        for page in pdf.pages:
+            for ln in _lines(page):
+                labels: list[list[str]] = [[ln[0].text]]
+                for prev, w in zip(ln, ln[1:], strict=False):
+                    if w.x0 - prev.x1 > 6:
+                        labels.append([w.text])
+                    else:
+                        labels[-1].append(w.text)
+                names = [" ".join(g) for g in labels]
+                if sum(1 for rx in _HEADER_HINTS if any(rx.search(n) for n in names)) >= 3:
+                    return names
+    return None

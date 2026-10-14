@@ -1,0 +1,13 @@
+# Fictional "Orchid Bank": one signed Amount column (negative = debit), CSV or XLSX, dd-Mon-yyyy dates.
+name: layout_b_orchid
+bank_name: Orchid Bank
+sources: [csv, xlsx]
+amount_style: signed
+signed_credit_positive: true
+date_formats: ["%d-%b-%Y", "%Y-%m-%d"]
+columns:
+  - {field: date,      header: "Txn Date",    kind: text}
+  - {field: narration, header: "Description", kind: text}
+  - {field: ref,       header: "Ref No",      kind: text}
+  - {field: amount,    header: "Amount",      kind: money}
+  - {field: balance,   header: "Balance",     kind: money}

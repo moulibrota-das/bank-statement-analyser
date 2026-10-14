@@ -1,0 +1,684 @@
+{
+  "name": "velocity_c_2024_q3",
+  "file": "velocity_c_2024_q3.pdf",
+  "layout": "C",
+  "synthetic": true,
+  "meta": {
+    "account_holder": "ROHIT DESAI",
+    "account_number_masked": "XXXXXXXXXX1016",
+    "ifsc": "VELO0004219",
+    "branch": "Andheri East, Mumbai",
+    "bank_name": "Velocity Bank",
+    "period_start": "2024-08-01",
+    "period_end": "2024-09-30",
+    "opening_balance": "90000.00",
+    "closing_balance": "26067.00"
+  },
+  "totals": {
+    "total_credits": "220000.00",
+    "total_debits": "283933.00",
+    "net": "-63933.00",
+    "count": 56
+  },
+  "transactions": [
+    {
+      "idx": 0,
+      "date": "2024-08-01",
+      "narration": "NEFT-VELON24080187506-CRESTLINE INFOTECH PVT LTD-SALARY AUG24",
+      "amount": "110000.00",
+      "direction": "credit",
+      "balance": "200000.00",
+      "category": "Salary",
+      "channel": "NEFT",
+      "ambiguous": false
+    },
+    {
+      "idx": 1,
+      "date": "2024-08-03",
+      "narration": "UPI/577042522087/ZEPTO/zepto@ybl/Order",
+      "amount": "192.00",
+      "direction": "debit",
+      "balance": "199808.00",
+      "category": "Food",
+      "channel": "UPI",
+      "ambiguous": false
+    },
+    {
+      "idx": 2,
+      "date": "2024-08-03",
+      "narration": "UPI/808377889230/UBER INDIA/uber@axisbank/Ride",
+      "amount": "1628.00",
+      "direction": "debit",
+      "balance": "198180.00",
+      "category": "Travel",
+      "channel": "UPI",
+      "ambiguous": false
+    },
+    {
+      "idx": 3,
+      "date": "2024-08-05",
+      "narration": "UPI/216526967732/MANISH DESAI/manish@okicici/Rent AUG",
+      "amount": "30000.00",
+      "direction": "debit",
+      "balance": "168180.00",
+      "category": "Rent",
+      "channel": "UPI",
+      "ambiguous": false
+    },
+    {
+      "idx": 4,
+      "date": "2024-08-07",
+      "narration": "UPI/154494452453/GAURIKA MASTER/gaurika@oksbi/Sent via UPI",
+      "amount": "345.00",
+      "direction": "debit",
+      "balance": "167835.00",
+      "category": "Transfers",
+      "channel": "UPI",
+      "ambiguous": false
+    },
+    {
+      "idx": 5,
+      "date": "2024-08-08",
+      "narration": "UPI/403581808041/PAYTM WALLET/paytm@paytm/Add money",
+      "amount": "2000.00",
+      "direction": "debit",
+      "balance": "165835.00",
+      "category": "Transfers",
+      "channel": "UPI",
+      "ambiguous": true
+    },
+    {
+      "idx": 6,
+      "date": "2024-08-09",
+      "narration": "UPI/287096822884/AJIO/ajio@icici/Purchase",
+      "amount": "1243.00",
+      "direction": "debit",
+      "balance": "164592.00",
+      "category": "Shopping",
+      "channel": "UPI",
+      "ambiguous": false
+    },
+    {
+      "idx": 7,
+      "date": "2024-08-10",
+      "narration": "UPI/599694018688/AJIO/ajio@icici/Purchase",
+      "amount": "1963.00",
+      "direction": "debit",
+      "balance": "162629.00",
+      "category": "Shopping",
+      "channel": "UPI",
+      "ambiguous": false
+    },
+    {
+      "idx": 8,
+      "date": "2024-08-10",
+      "narration": "NEFT-VELON24081061278-XYZ ENTERPRISES-INV 2231",
+      "amount": "8400.00",
+      "direction": "debit",
+      "balance": "154229.00",
+      "category": "Other",
+      "channel": "NEFT",
+      "ambiguous": true
+    },
+    {
+      "idx": 9,
+      "date": "2024-08-12",
+      "narration": "ACH D-BESCOM BANGALORE-89798694",
+      "amount": "1632.00",
+      "direction": "debit",
+      "balance": "152597.00",
+      "category": "Utilities",
+      "channel": "ACH",
+      "ambiguous": false
+    },
+    {
+      "idx": 10,
+      "date": "2024-08-12",
+      "narration": "UPI/835511416219/IKBAL AGATE/ikbal@oksbi/Sent via UPI",
+      "amount": "434.00",
+      "direction": "debit",
+      "balance": "152163.00",
+      "category": "Transfers",
+      "channel": "UPI",
+      "ambiguous": false
+    },
+    {
+      "idx": 11,
+      "date": "2024-08-13",
+      "narration": "ATM-CASH WDL/CHENNAI ATM 6756/249457",
+      "amount": "2000.00",
+      "direction": "debit",
+      "balance": "150163.00",
+      "category": "Transfers",
+      "channel": "ATM",
+      "ambiguous": false
+    },
+    {
+      "idx": 12,
+      "date": "2024-08-14",
+      "narration": "UPI/685519031466/ZEPTO/zepto@ybl/Order",
+      "amount": "619.00",
+      "direction": "debit",
+      "balance": "149544.00",
+      "category": "Food",
+      "channel": "UPI",
+      "ambiguous": false
+    },
+    {
+      "idx": 13,
+      "date": "2024-08-14",
+      "narration": "UPI/272456318424/ZEPTO/zepto@ybl/Order",
+      "amount": "637.00",
+      "direction": "debit",
+      "balance": "148907.00",
+      "category": "Food",
+      "channel": "UPI",
+      "ambiguous": false
+    },
+    {
+      "idx": 14,
+      "date": "2024-08-14",
+      "narration": "UPI/639025831981/ZEPTO/zepto@ybl/Order",
+      "amount": "441.00",
+      "direction": "debit",
+      "balance": "148466.00",
+      "category": "Food",
+      "channel": "UPI",
+      "ambiguous": false
+    },
+    {
+      "idx": 15,
+      "date": "2024-08-15",
+      "narration": "UPI/330925679820/AIRTEL/airtel@icici/Broadband bill",
+      "amount": "1099.00",
+      "direction": "debit",
+      "balance": "147367.00",
+      "category": "Utilities",
+      "channel": "UPI",
+      "ambiguous": false
+    },
+    {
+      "idx": 16,
+      "date": "2024-08-17",
+      "narration": "UPI/684487517828/SWIGGY/swiggy@icici/Order",
+      "amount": "653.00",
+      "direction": "debit",
+      "balance": "146714.00",
+      "category": "Food",
+      "channel": "UPI",
+      "ambiguous": false
+    },
+    {
+      "idx": 17,
+      "date": "2024-08-17",
+      "narration": "UPI/599354175769/ZEPTO/zepto@ybl/Order",
+      "amount": "505.00",
+      "direction": "debit",
+      "balance": "146209.00",
+      "category": "Food",
+      "channel": "UPI",
+      "ambiguous": false
+    },
+    {
+      "idx": 18,
+      "date": "2024-08-18",
+      "narration": "UPI/172695130433/RELIANCE JIO/jio@axisbank/Recharge",
+      "amount": "349.00",
+      "direction": "debit",
+      "balance": "145860.00",
+      "category": "Utilities",
+      "channel": "UPI",
+      "ambiguous": false
+    },
+    {
+      "idx": 19,
+      "date": "2024-08-18",
+      "narration": "UPI/978224393184/UBER INDIA/uber@axisbank/Ride",
+      "amount": "1348.00",
+      "direction": "debit",
+      "balance": "144512.00",
+      "category": "Travel",
+      "channel": "UPI",
+      "ambiguous": false
+    },
+    {
+      "idx": 20,
+      "date": "2024-08-18",
+      "narration": "POS 4821 MAKEMYTRIP INDIA HYDERABAD",
+      "amount": "5266.00",
+      "direction": "debit",
+      "balance": "139246.00",
+      "category": "Travel",
+      "channel": "POS",
+      "ambiguous": false
+    },
+    {
+      "idx": 21,
+      "date": "2024-08-19",
+      "narration": "UPI/515777727002/SWIGGY/swiggy@icici/Order",
+      "amount": "240.00",
+      "direction": "debit",
+      "balance": "139006.00",
+      "category": "Food",
+      "channel": "UPI",
+      "ambiguous": false
+    },
+    {
+      "idx": 22,
+      "date": "2024-08-19",
+      "narration": "UPI/678540636051/IJAYA GANDHI/ijaya@oksbi/Sent via UPI",
+      "amount": "906.00",
+      "direction": "debit",
+      "balance": "138100.00",
+      "category": "Transfers",
+      "channel": "UPI",
+      "ambiguous": false
+    },
+    {
+      "idx": 23,
+      "date": "2024-08-21",
+      "narration": "UPI/239075355503/SWIGGY/swiggy@icici/Order",
+      "amount": "319.00",
+      "direction": "debit",
+      "balance": "137781.00",
+      "category": "Food",
+      "channel": "UPI",
+      "ambiguous": false
+    },
+    {
+      "idx": 24,
+      "date": "2024-08-22",
+      "narration": "UPI/299430633784/UBER INDIA/uber@axisbank/Ride",
+      "amount": "1036.00",
+      "direction": "debit",
+      "balance": "136745.00",
+      "category": "Travel",
+      "channel": "UPI",
+      "ambiguous": false
+    },
+    {
+      "idx": 25,
+      "date": "2024-08-24",
+      "narration": "ACH D-HDFC CREDIT CARD PAYMENT-81385209",
+      "amount": "22397.00",
+      "direction": "debit",
+      "balance": "114348.00",
+      "category": "Transfers",
+      "channel": "ACH",
+      "ambiguous": true
+    },
+    {
+      "idx": 26,
+      "date": "2024-08-25",
+      "narration": "UPI/187781609599/SWIGGY/swiggy@icici/Order",
+      "amount": "576.00",
+      "direction": "debit",
+      "balance": "113772.00",
+      "category": "Food",
+      "channel": "UPI",
+      "ambiguous": false
+    },
+    {
+      "idx": 27,
+      "date": "2024-09-01",
+      "narration": "NEFT-VELON24090190039-CRESTLINE INFOTECH PVT LTD-SALARY SEP24",
+      "amount": "110000.00",
+      "direction": "credit",
+      "balance": "223772.00",
+      "category": "Salary",
+      "channel": "NEFT",
+      "ambiguous": false
+    },
+    {
+      "idx": 28,
+      "date": "2024-09-03",
+      "narration": "UPI/390111967500/TRIVENI TANEJA/triveni@oksbi/Sent via UPI",
+      "amount": "1400.00",
+      "direction": "debit",
+      "balance": "222372.00",
+      "category": "Transfers",
+      "channel": "UPI",
+      "ambiguous": false
+    },
+    {
+      "idx": 29,
+      "date": "2024-09-04",
+      "narration": "UPI/744663341275/ZEPTO/zepto@ybl/Order",
+      "amount": "681.00",
+      "direction": "debit",
+      "balance": "221691.00",
+      "category": "Food",
+      "channel": "UPI",
+      "ambiguous": false
+    },
+    {
+      "idx": 30,
+      "date": "2024-09-04",
+      "narration": "UPI/217362839527/ZOMATO/zomato@hdfcbank/Order",
+      "amount": "506.00",
+      "direction": "debit",
+      "balance": "221185.00",
+      "category": "Food",
+      "channel": "UPI",
+      "ambiguous": false
+    },
+    {
+      "idx": 31,
+      "date": "2024-09-04",
+      "narration": "UPI/836938493534/AJIO/ajio@icici/Purchase",
+      "amount": "4171.00",
+      "direction": "debit",
+      "balance": "217014.00",
+      "category": "Shopping",
+      "channel": "UPI",
+      "ambiguous": false
+    },
+    {
+      "idx": 32,
+      "date": "2024-09-05",
+      "narration": "UPI/789894102859/MANISH DESAI/manish@okicici/Rent SEP",
+      "amount": "30000.00",
+      "direction": "debit",
+      "balance": "187014.00",
+      "category": "Rent",
+      "channel": "UPI",
+      "ambiguous": false
+    },
+    {
+      "idx": 33,
+      "date": "2024-09-05",
+      "narration": "UPI/727296746509/REDBUS/redbus@hdfcbank/Ticket",
+      "amount": "1534.00",
+      "direction": "debit",
+      "balance": "185480.00",
+      "category": "Travel",
+      "channel": "UPI",
+      "ambiguous": false
+    },
+    {
+      "idx": 34,
+      "date": "2024-09-07",
+      "narration": "ATM-CASH WDL/MUMBAI ATM 3409/111496",
+      "amount": "3000.00",
+      "direction": "debit",
+      "balance": "182480.00",
+      "category": "Transfers",
+      "channel": "ATM",
+      "ambiguous": false
+    },
+    {
+      "idx": 35,
+      "date": "2024-09-08",
+      "narration": "UPI/716017615991/ZOMATO/zomato@hdfcbank/Order",
+      "amount": "800.00",
+      "direction": "debit",
+      "balance": "181680.00",
+      "category": "Food",
+      "channel": "UPI",
+      "ambiguous": false
+    },
+    {
+      "idx": 36,
+      "date": "2024-09-10",
+      "narration": "UPI/949122382718/FLIPKART/flipkart@axb/Purchase",
+      "amount": "2461.00",
+      "direction": "debit",
+      "balance": "179219.00",
+      "category": "Shopping",
+      "channel": "UPI",
+      "ambiguous": false
+    },
+    {
+      "idx": 37,
+      "date": "2024-09-10",
+      "narration": "UPI/143070384671/IRCTC/irctc@sbi/Ticket",
+      "amount": "1129.00",
+      "direction": "debit",
+      "balance": "178090.00",
+      "category": "Travel",
+      "channel": "UPI",
+      "ambiguous": false
+    },
+    {
+      "idx": 38,
+      "date": "2024-09-11",
+      "narration": "UPI/642971863526/OLA CABS/olacabs@icici/Ride",
+      "amount": "635.00",
+      "direction": "debit",
+      "balance": "177455.00",
+      "category": "Travel",
+      "channel": "UPI",
+      "ambiguous": false
+    },
+    {
+      "idx": 39,
+      "date": "2024-09-11",
+      "narration": "UPI/653678292944/OMKAAR SANI/omkaar@oksbi/Sent via UPI",
+      "amount": "394.00",
+      "direction": "debit",
+      "balance": "177061.00",
+      "category": "Transfers",
+      "channel": "UPI",
+      "ambiguous": false
+    },
+    {
+      "idx": 40,
+      "date": "2024-09-12",
+      "narration": "ACH D-BESCOM BANGALORE-45182493",
+      "amount": "1895.00",
+      "direction": "debit",
+      "balance": "175166.00",
+      "category": "Utilities",
+      "channel": "ACH",
+      "ambiguous": false
+    },
+    {
+      "idx": 41,
+      "date": "2024-09-13",
+      "narration": "UPI/304881138343/DOMINOS PIZZA/dominos@paytm/Order",
+      "amount": "492.00",
+      "direction": "debit",
+      "balance": "174674.00",
+      "category": "Food",
+      "channel": "UPI",
+      "ambiguous": false
+    },
+    {
+      "idx": 42,
+      "date": "2024-09-14",
+      "narration": "UPI/488166163168/ZOMATO/zomato@hdfcbank/Order",
+      "amount": "631.00",
+      "direction": "debit",
+      "balance": "174043.00",
+      "category": "Food",
+      "channel": "UPI",
+      "ambiguous": false
+    },
+    {
+      "idx": 43,
+      "date": "2024-09-14",
+      "narration": "NEFT-VELON24091419757-SUNRISE VENTURES-TRANSFER",
+      "amount": "100000.00",
+      "direction": "debit",
+      "balance": "74043.00",
+      "category": "Transfers",
+      "channel": "NEFT",
+      "ambiguous": false
+    },
+    {
+      "idx": 44,
+      "date": "2024-09-15",
+      "narration": "UPI/634935263664/AIRTEL/airtel@icici/Broadband bill",
+      "amount": "1099.00",
+      "direction": "debit",
+      "balance": "72944.00",
+      "category": "Utilities",
+      "channel": "UPI",
+      "ambiguous": false
+    },
+    {
+      "idx": 45,
+      "date": "2024-09-16",
+      "narration": "ATM-CASH WDL/BENGALURU ATM 9303/824219",
+      "amount": "3000.00",
+      "direction": "debit",
+      "balance": "69944.00",
+      "category": "Transfers",
+      "channel": "ATM",
+      "ambiguous": false
+    },
+    {
+      "idx": 46,
+      "date": "2024-09-17",
+      "narration": "UPI/650927621850/SWIGGY/swiggy@icici/Order",
+      "amount": "527.00",
+      "direction": "debit",
+      "balance": "69417.00",
+      "category": "Food",
+      "channel": "UPI",
+      "ambiguous": false
+    },
+    {
+      "idx": 47,
+      "date": "2024-09-17",
+      "narration": "UPI/441338993027/HARISH RANDHAWA/harish@oksbi/Sent via UPI",
+      "amount": "399.00",
+      "direction": "debit",
+      "balance": "69018.00",
+      "category": "Transfers",
+      "channel": "UPI",
+      "ambiguous": false
+    },
+    {
+      "idx": 48,
+      "date": "2024-09-18",
+      "narration": "UPI/089606411739/RELIANCE JIO/jio@axisbank/Recharge",
+      "amount": "349.00",
+      "direction": "debit",
+      "balance": "68669.00",
+      "category": "Utilities",
+      "channel": "UPI",
+      "ambiguous": false
+    },
+    {
+      "idx": 49,
+      "date": "2024-09-19",
+      "narration": "UPI/316629500170/UBER INDIA/uber@axisbank/Ride",
+      "amount": "1988.00",
+      "direction": "debit",
+      "balance": "66681.00",
+      "category": "Travel",
+      "channel": "UPI",
+      "ambiguous": false
+    },
+    {
+      "idx": 50,
+      "date": "2024-09-20",
+      "narration": "UPI/374944930851/MYNTRA/myntra@ybl/Purchase",
+      "amount": "405.00",
+      "direction": "debit",
+      "balance": "66276.00",
+      "category": "Shopping",
+      "channel": "UPI",
+      "ambiguous": false
+    },
+    {
+      "idx": 51,
+      "date": "2024-09-21",
+      "narration": "ATM-CASH WDL/HYDERABAD ATM 6980/676572",
+      "amount": "10000.00",
+      "direction": "debit",
+      "balance": "56276.00",
+      "category": "Transfers",
+      "channel": "ATM",
+      "ambiguous": false
+    },
+    {
+      "idx": 52,
+      "date": "2024-09-22",
+      "narration": "ATM-CASH WDL/MUMBAI ATM 7389/286098",
+      "amount": "10000.00",
+      "direction": "debit",
+      "balance": "46276.00",
+      "category": "Transfers",
+      "channel": "ATM",
+      "ambiguous": false
+    },
+    {
+      "idx": 53,
+      "date": "2024-09-22",
+      "narration": "ATM-CASH WDL/CHENNAI ATM 7174/499527",
+      "amount": "10000.00",
+      "direction": "debit",
+      "balance": "36276.00",
+      "category": "Transfers",
+      "channel": "ATM",
+      "ambiguous": false
+    },
+    {
+      "idx": 54,
+      "date": "2024-09-23",
+      "narration": "ATM-CASH WDL/HYDERABAD ATM 4348/465044",
+      "amount": "10000.00",
+      "direction": "debit",
+      "balance": "26276.00",
+      "category": "Transfers",
+      "channel": "ATM",
+      "ambiguous": false
+    },
+    {
+      "idx": 55,
+      "date": "2024-09-25",
+      "narration": "UPI/794815786170/SWIGGY/swiggy@icici/Order",
+      "amount": "209.00",
+      "direction": "debit",
+      "balance": "26067.00",
+      "category": "Food",
+      "channel": "UPI",
+      "ambiguous": false
+    }
+  ],
+  "expected_anomalies": [
+    {
+      "code": "ROUND_NUMBER_LARGE",
+      "txn_idx": [
+        43
+      ],
+      "acceptable_extra": false
+    },
+    {
+      "code": "NEW_PAYEE_LARGE",
+      "txn_idx": [
+        43
+      ],
+      "acceptable_extra": false
+    },
+    {
+      "code": "AMOUNT_OUTLIER",
+      "txn_idx": [
+        43
+      ],
+      "acceptable_extra": true
+    },
+    {
+      "code": "CASH_SPIKE",
+      "txn_idx": [
+        51,
+        52,
+        53,
+        54
+      ],
+      "acceptable_extra": false
+    },
+    {
+      "code": "AMOUNT_OUTLIER",
+      "txn_idx": [
+        51,
+        52,
+        53,
+        54
+      ],
+      "acceptable_extra": true
+    }
+  ]
+}

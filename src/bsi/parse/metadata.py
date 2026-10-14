@@ -27,7 +27,7 @@ _PERIOD = re.compile(
     rf"(?:Statement\s*Period|Period|Statement\s*From|From)\s*[:\-]?\s*({_DATE})\s*(?:to|-|–|till)\s*({_DATE})",
     re.IGNORECASE,
 )
-_BAL = r"\s*(?:\(.*?\))?\s*[:\-]?\s*((?:₹|Rs\.?|INR)?\s*-?[\d,]+\.\d{2}\s*(?:Dr|Cr)?)"
+_BAL = r"\s*(?:\(.*?\))?\s*[:\-]?\s*((?:₹|Rs\.?|INR)?\s*-?\d[\d,]*(?:\.\d{1,2})?\s*(?:Dr|Cr)?)"
 _OPENING = re.compile(r"Opening\s*Bal(?:ance)?" + _BAL, re.IGNORECASE)
 _CLOSING = re.compile(r"Closing\s*Bal(?:ance)?" + _BAL, re.IGNORECASE)
 
