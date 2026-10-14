@@ -35,7 +35,11 @@ src = ["src", "tests", "scripts", "app", "eval"]
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP", "B"]
 
+[tool.ruff.lint.flake8-bugbear]
+extend-immutable-calls = ["fastapi.Depends", "fastapi.File", "fastapi.Query"]
+
 [tool.ruff.lint.per-file-ignores]
 "scripts/*" = ["E501"]
 "scripts/generators/*" = ["E501"]
 "eval/*" = ["E501"]
+"app/*" = ["E501"]

@@ -192,6 +192,24 @@ class ProcessingInfo(BaseModel):
 
 
 class StatementReport(BaseModel):
+    model_config = ConfigDict(json_schema_extra={"example": {
+        "meta": {"account_holder": "AARAV MEHTA", "account_number_masked": "XXXXXXXXXX4177", "ifsc": "NIMB0001669",
+                 "branch": "Indiranagar, Bengaluru", "bank_name": "Nimbus Bank", "period_start": "2024-01-01",
+                 "period_end": "2024-02-29", "opening_balance": "60000.00", "closing_balance": "9147.00",
+                 "layout": "layout_a_nimbus", "source_type": "pdf"},
+        "transactions": [{"idx": 0, "date": "2024-01-01",
+                          "narration": "NEFT-NIMBN24010186172-TECHNOVA SOLUTIONS PVT LTD-SALARY JAN24",
+                          "amount": "85000.00", "direction": "credit", "balance": "145000.00", "channel": "NEFT",
+                          "counterparty": "TECHNOVA SOLUTIONS PVT LTD", "counterparty_key": "technova",
+                          "category": "Salary", "category_source": "rule", "category_confidence": 0.95,
+                          "category_rationale": "narration contains 'salary'", "is_recurring": True}],
+        "reconciliation": {"passed": True, "total_credits": "170000.00", "total_debits": "220853.00",
+                           "rows_checked": 53, "issues": []},
+        "anomalies": [{"code": "ROUND_NUMBER_LARGE", "severity": "medium", "txn_idx": [42],
+                       "reason": "Large round-number payment of ₹1,00,000.00 to SUNRISE VENTURES"}],
+        "processing": {"mock_mode": True, "llm_calls": 2, "cache_hits": 0, "prompt_version": "classify_v4",
+                       "elapsed_ms": 240},
+        "warnings": [], "analytics": "(abridged in this example)", "summary": "(abridged in this example)"}})
     meta: StatementMeta
     transactions: list[Transaction]
     reconciliation: ReconciliationResult
