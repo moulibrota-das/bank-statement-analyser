@@ -13,11 +13,21 @@ API_BASE_URL = os.environ.get("API_BASE_URL", "http://localhost:8000").rstrip("/
 BLUE, ORANGE = "#2a78d6", "#eb6834"  # categorical slots 1 and 2
 SEV = {"high": "🔴", "medium": "🟠", "low": "🟡"}
 
-st.set_page_config(page_title="Bank Statement Intel", page_icon="🏦", layout="wide")
-
-
-def api(method: str, path: str, **kw):
-    return httpx.request(method, f"{API_BASE_URL}{path}", timeout=120, **kw)
+st.set_page_config(page_title="Bank Statement Analyzer", page_icon="🏦", layout="centered",
+                   initial_sidebar_state="collapsed")
+st.markdown("""
+<style>
+#MainMenu, footer, [data-testid="stSidebar"], [data-testid="collapsedControl"] {display: none;}
+.block-container {max-width: 1000px; padding-top: 2.2rem;}
+h1 {font-weight: 600; letter-spacing: -0.02em;}
+[data-testid="stFileUploaderDropzone"] {padding: 3rem 1rem; border-radius: 14px; border-width: 2px;}
+[data-testid="stMetricValue"] {font-size: 1.5rem;}
+.hero {text-align: center; margin: 3.5rem 0 1.5rem;}
+.hero h1 {margin-bottom: .2rem;}
+.hero p {color: #898781; margin: 0;}
+.pill {font-size: .8rem; color: #898781; text-align: right;}
+</style>
+""", unsafe_allow_html=True)
 
 
 def inr(x: float | str) -> str:
@@ -35,173 +45,160 @@ def health(base: str):
 @st.cache_data(ttl=60, show_spinner=False)
 def samples(base: str):
     try:
-        return httpx.get(f"{base}/samples", timeout=10).json()
+        return [s["name"] for s in httpx.get(f"{base}/samples", timeout=10).json()]
     except Exception:  # noqa: BLE001
         return []
 
 
-# ---------------------------------------------------------------- sidebar
-st.sidebar.title("🏦 Bank Statement Intel")
+def analyze(label: str, request) -> None:
+    with st.spinner(f"Analyzing {label}…"):
+        try:
+            r = request()
+        except httpx.HTTPError as e:
+            st.session_state["error"] = f"Could not reach the API at {API_BASE_URL}: {e}"
+            return
+    if r.status_code == 200:
+        st.session_state.update(report=r.json(), label=label, error=None)
+    else:
+        st.session_state["error"] = r.json().get("detail", r.text)
+
+
+# ---------------------------------------------------------------- status line
 h = health(API_BASE_URL)
 if h is None:
-    st.sidebar.error(f"API unreachable at {API_BASE_URL}")
+    status = f"🔴 API unreachable at {API_BASE_URL}"
 elif h["mode"] == "mock":
-    st.sidebar.warning("API online · **MOCK mode** (offline stub LLM, no API key)")
+    status = "🟠 API online · mock mode (offline stub, no API key)"
 else:
-    st.sidebar.success(f"API online · live LLM (`{h['model']}`)")
-if h:
-    st.sidebar.caption(f"v{h['version']} · prompt `{h['classify_prompt']}`")
+    status = f"🟢 API online · {h['model']}"
+st.markdown(f'<div class="pill">{status}</div>', unsafe_allow_html=True)
 
-source = st.sidebar.radio("Statement source", ["Bundled sample", "Upload file"])
-use_llm = st.sidebar.toggle("Use LLM", value=True, help="Off = rules and template summary only")
-report = None
-error = None
-if source == "Upload file":
-    up = st.sidebar.file_uploader("PDF, CSV or XLSX", type=["pdf", "csv", "xlsx"])
-    if up and st.sidebar.button("Analyze", type="primary"):
-        with st.spinner("Analyzing…"):
-            try:
-                r = api("POST", "/analyze", params={"use_llm": use_llm}, files={"file": (up.name, up.getvalue())})
-                if r.status_code == 200:
-                    report = r.json()
-                else:
-                    error = r.json().get("detail", r.text)
-            except httpx.HTTPError as e:
-                error = f"Could not reach the API: {e}"
-else:
-    names = [s["name"] for s in samples(API_BASE_URL)]
-    pick = st.sidebar.selectbox("Sample (synthetic data)", names) if names else None
-    if pick and st.sidebar.button("Analyze sample", type="primary"):
-        with st.spinner("Analyzing…"):
-            try:
-                r = api("GET", f"/samples/{pick}/analyze", params={"use_llm": use_llm})
-                if r.status_code == 200:
-                    report = r.json()
-                else:
-                    error = r.json().get("detail", r.text)
-            except httpx.HTTPError as e:
-                error = f"Could not reach the API: {e}"
-
-if report is not None:
-    st.session_state["report"] = report
-if error:
-    st.error(error)
 report = st.session_state.get("report")
 
-st.title("Bank Statement Analyzer")
+# ---------------------------------------------------------------- landing: central upload
 if not report:
-    st.info("Pick a bundled synthetic sample or upload a statement in the sidebar, then press **Analyze**.")
+    st.markdown('<div class="hero"><h1>Bank Statement Analyzer</h1>'
+                "<p>Upload a statement to see transactions, categories, spending and anything unusual.</p></div>",
+                unsafe_allow_html=True)
+    _, mid, _ = st.columns([1, 6, 1])
+    with mid:
+        use_llm = st.toggle("Use AI for ambiguous rows and the summary", value=True,
+                            help="Off: deterministic rules and a template summary only.")
+        up = st.file_uploader("Upload statement", type=["pdf", "csv", "xlsx"], label_visibility="collapsed",
+                              help="PDF, CSV or XLSX · max 10 MB · processed in memory, never stored")
+        st.caption("PDF, CSV or XLSX · processed in memory and never stored · account numbers are masked")
+        if up is not None:
+            analyze(up.name, lambda: httpx.post(f"{API_BASE_URL}/analyze", params={"use_llm": use_llm},
+                                                files={"file": (up.name, up.getvalue())}, timeout=120))
+            if st.session_state.get("report"):
+                st.rerun()
+        names = samples(API_BASE_URL)
+        if names:
+            with st.expander("No statement handy? Try a synthetic sample"):
+                pick = st.selectbox("Sample", names, label_visibility="collapsed")
+                if st.button("Analyze sample"):
+                    analyze(pick, lambda: httpx.get(f"{API_BASE_URL}/samples/{pick}/analyze",
+                                                    params={"use_llm": use_llm}, timeout=120))
+                    if st.session_state.get("report"):
+                        st.rerun()
+        if st.session_state.get("error"):
+            st.error(st.session_state["error"])
     st.stop()
 
-meta, rec, an, summ = report["meta"], report["reconciliation"], report["analytics"], report["summary"]
-proc = report["processing"]
-if proc["mock_mode"] and use_llm:
-    st.warning("Mock mode: classifications and narrative come from an offline stub, not a real model.")
-
-# ---------------------------------------------------------------- overview
-st.subheader("Account")
-c1, c2, c3, c4 = st.columns(4)
-c1.metric("Account", meta["account_number_masked"] or "n/a")
-c2.metric("Holder", meta["account_holder"] or "n/a")
-c3.metric("Period", f"{meta['period_start']} → {meta['period_end']}")
-c4.metric("Layout", meta["layout"] or "n/a")
-st.caption(f"{meta.get('bank_name') or ''} · IFSC {meta['ifsc'] or 'n/a'} · {meta['branch'] or ''} · "
-           f"opening {inr(meta['opening_balance']) if meta['opening_balance'] else 'n/a'} · "
-           f"closing {inr(meta['closing_balance']) if meta['closing_balance'] else 'n/a'}")
+# ---------------------------------------------------------------- results
+meta, rec, an, summ, proc = (report[k] for k in ("meta", "reconciliation", "analytics", "summary", "processing"))
+top_l, top_r = st.columns([4, 1])
+top_l.markdown(f"### {st.session_state.get('label', 'Statement')}")
+if top_r.button("New statement", width="stretch"):
+    for k in ("report", "label", "error"):
+        st.session_state.pop(k, None)
+    st.rerun()
+st.caption(f"{meta.get('bank_name') or ''} · {meta['account_holder'] or ''} · a/c {meta['account_number_masked'] or 'n/a'} · "
+           f"{meta['period_start']} → {meta['period_end']}")
+if proc["mock_mode"]:
+    st.caption("🟠 Mock mode: AI classifications and narrative come from an offline stub, not a real model.")
 
 if rec["passed"]:
-    st.success(f"✅ Reconciliation passed: {rec['rows_checked']} running balances verified; "
-               f"opening + credits − debits = closing ({inr(rec['expected_closing'])}).")
+    st.success(f"Balances reconcile ({rec['rows_checked']} rows verified).")
 else:
-    st.error(f"❌ Reconciliation FAILED: {len(rec['issues'])} issue(s). Extracted data may be wrong.")
+    st.error(f"Reconciliation failed: {len(rec['issues'])} issue(s). Extracted data may be wrong.")
     for i in rec["issues"]:
         st.markdown(f"- {i['message']}")
-for w in report["warnings"]:
-    if "Reconciliation failed" not in w:
-        st.caption(f"⚠️ {w}")
 
-k1, k2, k3, k4 = st.columns(4)
-k1.metric("Total credits", inr(an["total_credits"]))
-k2.metric("Total debits", inr(an["total_debits"]))
+k1, k2, k3 = st.columns(3)
+k1.metric("Credits", inr(an["total_credits"]))
+k2.metric("Debits", inr(an["total_debits"]))
 k3.metric("Net", inr(an["net"]))
-k4.metric("LLM calls", proc["llm_calls"], help=f"cache hits: {proc['cache_hits']} · {proc['elapsed_ms']} ms")
 
-# ---------------------------------------------------------------- summary
-st.subheader("Summary")
-st.markdown(f"**{summ['account_summary']}**  \n{summ['period']}")
-st.write(summ["narrative"])
-st.caption(f"Narrative source: {summ['source']} · figures verified against computed data: "
-           f"{'yes' if summ['faithfulness_passed'] else 'no'}")
+t_sum, t_tx, t_an = st.tabs(["Summary", "Transactions", f"Anomalies ({len(report['anomalies'])})"])
 
-# ---------------------------------------------------------------- charts
-ch1, ch2 = st.columns(2)
-spend = an["spend_by_category"]
-if spend:
-    fig = go.Figure(go.Bar(x=[s["category"] for s in spend], y=[float(s["total"]) for s in spend],
-                           marker_color=BLUE, customdata=[[s["pct_of_debits"], s["count"]] for s in spend],
-                           hovertemplate="%{x}<br>₹%{y:,.2f}<br>%{customdata[0]}% of debits · "
-                                         "%{customdata[1]} txns<extra></extra>"))
-    fig.update_layout(title="Spend by category", yaxis_title="₹ debited", height=340, margin=dict(t=50, b=10),
-                      plot_bgcolor="rgba(0,0,0,0)", paper_bgcolor="rgba(0,0,0,0)")
-    ch1.plotly_chart(fig, width="stretch")
-mon = an["monthly"]
-if mon:
-    fig = go.Figure([
-        go.Bar(name="Credits", x=[m["month"] for m in mon], y=[float(m["credits"]) for m in mon], marker_color=BLUE),
-        go.Bar(name="Debits", x=[m["month"] for m in mon], y=[float(m["debits"]) for m in mon], marker_color=ORANGE)])
-    fig.update_layout(title="Monthly credits vs debits", barmode="group", height=340, margin=dict(t=50, b=10),
-                      yaxis_title="₹", legend=dict(orientation="h", y=1.12), plot_bgcolor="rgba(0,0,0,0)",
-                      paper_bgcolor="rgba(0,0,0,0)")
-    ch2.plotly_chart(fig, width="stretch")
-
-# ---------------------------------------------------------------- anomalies
-st.subheader(f"Anomalies ({len(report['anomalies'])})")
-tx_by_idx = {t["idx"]: t for t in report["transactions"]}
-if not report["anomalies"]:
-    st.success("No anomalies flagged.")
-for a in report["anomalies"]:
-    with st.expander(f"{SEV[a['severity']]} {a['code']} · {a['severity']}", expanded=a["severity"] == "high"):
-        st.write(a["reason"])
-        rows = [tx_by_idx[i] for i in a["txn_idx"] if i in tx_by_idx]
-        if rows:
-            st.dataframe(pd.DataFrame([{"date": t["date"], "narration": t["narration"], "amount": float(t["amount"]),
-                                        "direction": t["direction"]} for t in rows]), hide_index=True)
-
-# ---------------------------------------------------------------- transactions
-st.subheader("Transactions")
-df = pd.DataFrame([{
-    "date": t["date"], "narration": t["narration"], "channel": t["channel"], "counterparty": t["counterparty"],
-    "direction": t["direction"], "amount": float(t["amount"]), "balance": float(t["balance"]) if t["balance"] else None,
-    "category": t["category"], "source": t["category_source"], "confidence": t["category_confidence"],
-    "recurring": t["is_recurring"], "rationale": t["category_rationale"]} for t in report["transactions"]])
-f1, f2, f3, f4 = st.columns(4)
-cats = f1.multiselect("Category", sorted(df["category"].unique()))
-srcs = f2.multiselect("Source", sorted(df["source"].unique()))
-dirs = f3.multiselect("Direction", ["credit", "debit"])
-minc = f4.slider("Min confidence", 0.0, 1.0, 0.0, 0.05)
-q = st.text_input("Search narration / counterparty")
-view = df
-if cats:
-    view = view[view["category"].isin(cats)]
-if srcs:
-    view = view[view["source"].isin(srcs)]
-if dirs:
-    view = view[view["direction"].isin(dirs)]
-view = view[view["confidence"] >= minc]
-if q:
-    m = view["narration"].str.contains(q, case=False, na=False) | view["counterparty"].str.contains(q, case=False, na=False)
-    view = view[m]
-st.caption(f"{len(view)} of {len(df)} transactions")
-st.dataframe(view, hide_index=True, width="stretch",
-             column_config={"confidence": st.column_config.ProgressColumn(min_value=0, max_value=1, format="%.2f"),
-                            "amount": st.column_config.NumberColumn(format="₹%.2f"),
-                            "balance": st.column_config.NumberColumn(format="₹%.2f")})
-
-if an["recurring"]:
-    with st.expander("Recurring payments"):
+with t_sum:
+    st.write(summ["narrative"])
+    st.caption(f"Written by {'AI' if summ['source'] == 'llm' else 'template'} · figures verified against computed data")
+    layout = dict(height=320, margin=dict(t=40, b=10, l=10, r=10), plot_bgcolor="rgba(0,0,0,0)",
+                  paper_bgcolor="rgba(0,0,0,0)")
+    spend = an["spend_by_category"]
+    if spend:
+        fig = go.Figure(go.Bar(
+            x=[s["category"] for s in spend], y=[float(s["total"]) for s in spend], marker_color=BLUE,
+            customdata=[[s["pct_of_debits"], s["count"]] for s in spend],
+            hovertemplate="%{x}<br>₹%{y:,.2f}<br>%{customdata[0]}% of debits · %{customdata[1]} txns<extra></extra>"))
+        fig.update_layout(title="Spend by category", yaxis_title="₹", **layout)
+        st.plotly_chart(fig, width="stretch")
+    mon = an["monthly"]
+    if mon:
+        fig = go.Figure([
+            go.Bar(name="Credits", x=[m["month"] for m in mon], y=[float(m["credits"]) for m in mon],
+                   marker_color=BLUE),
+            go.Bar(name="Debits", x=[m["month"] for m in mon], y=[float(m["debits"]) for m in mon],
+                   marker_color=ORANGE)])
+        fig.update_layout(title="Monthly credits vs debits", barmode="group", yaxis_title="₹",
+                          legend=dict(orientation="h", y=1.15), **layout)
+        st.plotly_chart(fig, width="stretch")
+    if an["recurring"]:
+        st.markdown("**Recurring**")
         st.dataframe(pd.DataFrame([{"counterparty": r["counterparty"], "amount": float(r["typical_amount"]),
-                                    "times": r["occurrences"], "direction": r["direction"],
-                                    "category": r["category"]} for r in an["recurring"]]), hide_index=True)
+                                    "times": r["occurrences"], "category": r["category"]}
+                                   for r in an["recurring"]]), hide_index=True, width="stretch",
+                     column_config={"amount": st.column_config.NumberColumn(format="₹%.2f")})
 
-st.download_button("⬇️ Download report JSON", json.dumps(report, indent=2, ensure_ascii=False),
+with t_tx:
+    df = pd.DataFrame([{
+        "date": t["date"], "narration": t["narration"], "direction": t["direction"], "amount": float(t["amount"]),
+        "category": t["category"], "source": t["category_source"], "confidence": t["category_confidence"],
+        "balance": float(t["balance"]) if t["balance"] else None, "rationale": t["category_rationale"]}
+        for t in report["transactions"]])
+    f1, f2, f3 = st.columns(3)
+    cats = f1.multiselect("Category", sorted(df["category"].unique()))
+    srcs = f2.multiselect("Source", sorted(df["source"].unique()))
+    minc = f3.slider("Min confidence", 0.0, 1.0, 0.0, 0.05)
+    q = st.text_input("Search", placeholder="Search narration…", label_visibility="collapsed")
+    view = df
+    if cats:
+        view = view[view["category"].isin(cats)]
+    if srcs:
+        view = view[view["source"].isin(srcs)]
+    view = view[view["confidence"] >= minc]
+    if q:
+        view = view[view["narration"].str.contains(q, case=False, na=False)]
+    st.caption(f"{len(view)} of {len(df)} transactions")
+    st.dataframe(view, hide_index=True, width="stretch", column_config={
+        "confidence": st.column_config.ProgressColumn(min_value=0, max_value=1, format="%.2f"),
+        "amount": st.column_config.NumberColumn(format="₹%.2f"),
+        "balance": st.column_config.NumberColumn(format="₹%.2f")})
+
+with t_an:
+    tx_by_idx = {t["idx"]: t for t in report["transactions"]}
+    if not report["anomalies"]:
+        st.success("Nothing unusual found.")
+    for a in report["anomalies"]:
+        with st.expander(f"{SEV[a['severity']]} {a['code'].replace('_', ' ').title()}", expanded=a["severity"] == "high"):
+            st.write(a["reason"])
+            rows = [tx_by_idx[i] for i in a["txn_idx"] if i in tx_by_idx]
+            if rows:
+                st.dataframe(pd.DataFrame([{"date": t["date"], "narration": t["narration"],
+                                            "amount": float(t["amount"]), "direction": t["direction"]}
+                                           for t in rows]), hide_index=True, width="stretch")
+
+st.download_button("Download report (JSON)", json.dumps(report, indent=2, ensure_ascii=False),
                    file_name="report.json", mime="application/json")
