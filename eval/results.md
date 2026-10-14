@@ -2,7 +2,7 @@
 
 > **Mode: MOCK (offline).** LLM-dependent numbers (LLM-only, hybrid, summaries, LLM calls) come from a deterministic heuristic *stub*, not a language model, and must not be read as model quality. Extraction, rules-only classification, reconciliation and anomaly numbers are independent of the LLM.
 
-Generated 2026-10-14 12:22 from 6 synthetic statements (273 transactions). Reproduce: `python eval/run_eval.py --mock`.
+Generated 2026-10-14 12:25 from 6 synthetic statements (273 transactions). Reproduce: `python eval/run_eval.py --mock`.
 
 ## Extraction
 
@@ -69,7 +69,7 @@ Most common hybrid errors: Transfers→Other ×4.
 | Rows classified by LLM per statement | 7.5 |
 | Cache hits per statement | 0.0 |
 | Cache hit rate within a statement (hits / rows sent to LLM path) | 0.0% |
-| End-to-end latency per statement | 151 ms (mock LLM, no network) |
+| End-to-end latency per statement | 155 ms (mock LLM, no network) |
 
 ## Prompt versions (hybrid mode)
 
