@@ -13,6 +13,10 @@ and what you would do differently._
 
 ## How the runtime uses an LLM
 
+All JSON replies use Gemini **structured output**: the request carries the pydantic response model as
+`response_schema` with `response_mime_type=application/json`, so decoding is constrained to the schema. The
+reply is still validated with pydantic and retried once on failure.
+
 The LLM is used in exactly three places; everything else is deterministic code.
 
 | Use | Input sent | Output | Safeguards |

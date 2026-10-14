@@ -32,7 +32,7 @@ class LLMClient(Protocol):
     mock: bool
     stats: LLMStats
 
-    def complete(self, system: str, user: str, task: str = "") -> str: ...
+    def complete(self, system: str, user: str, task: str = "", schema: type[BaseModel] | None = None) -> str: ...
 
 
 class BaseClient:
@@ -42,15 +42,15 @@ class BaseClient:
     def __init__(self) -> None:
         self.stats = LLMStats()
 
-    def complete(self, system: str, user: str, task: str = "") -> str:
+    def complete(self, system: str, user: str, task: str = "", schema: type[BaseModel] | None = None) -> str:
         start = time.perf_counter()
         try:
-            return self._complete(system, user, task)
+            return self._complete(system, user, task, schema)
         finally:
             self.stats.calls += 1
             self.stats.seconds += time.perf_counter() - start
 
-    def _complete(self, system: str, user: str, task: str) -> str:  # pragma: no cover - abstract
+    def _complete(self, system: str, user: str, task: str, schema: type[BaseModel] | None) -> str:  # pragma: no cover
         raise NotImplementedError
 
 
@@ -64,13 +64,15 @@ class GeminiClient(BaseClient):
         self._client = genai.Client(api_key=api_key)
         self.model, self.max_tokens = model, max_tokens
 
-    def _complete(self, system: str, user: str, task: str) -> str:
+    def _complete(self, system: str, user: str, task: str, schema: type[BaseModel] | None) -> str:
         from google.genai import types
 
+        cfg: dict = {"system_instruction": system, "max_output_tokens": self.max_tokens}
+        if schema is not None:  # structured output: Gemini constrains decoding to the pydantic schema
+            cfg.update(response_mime_type="application/json", response_schema=schema)
         try:
             resp = self._client.models.generate_content(
-                model=self.model, contents=user,
-                config=types.GenerateContentConfig(system_instruction=system, max_output_tokens=self.max_tokens))
+                model=self.model, contents=user, config=types.GenerateContentConfig(**cfg))
         except Exception as e:  # network/auth/quota: surface uniformly
             raise LLMError(f"{type(e).__name__}: {e}") from e
         return resp.text or ""
@@ -91,9 +93,11 @@ class MockClient(BaseClient):
         self._responses = list(responses) if responses else None
         self._handler = handler
         self.calls: list[tuple[str, str, str]] = []
+        self.schemas: list[type[BaseModel] | None] = []
 
-    def _complete(self, system: str, user: str, task: str) -> str:
+    def _complete(self, system: str, user: str, task: str, schema: type[BaseModel] | None) -> str:
         self.calls.append((system, user, task))
+        self.schemas.append(schema)
         if self._responses:
             return self._responses.pop(0) if len(self._responses) > 1 else self._responses[0]
         if self._handler:
@@ -129,7 +133,7 @@ def complete_json(client: LLMClient, system: str, user: str, model: type[T], tas
                   retries: int = 1) -> T:
     prompt, last_err = user, ""
     for _ in range(retries + 1):
-        raw = client.complete(system, prompt, task)
+        raw = client.complete(system, prompt, task, schema=model)
         try:
             return model.model_validate(extract_json(raw))
         except (json.JSONDecodeError, ValidationError, ValueError) as e:

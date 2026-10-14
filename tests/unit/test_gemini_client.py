@@ -53,3 +53,49 @@ def test_make_client_selects_by_key():
     assert Settings(GEMINI_API_KEY="k", mock=None).mock_mode is False
     assert Settings(GOOGLE_API_KEY="k", mock=None).mock_mode is False
     assert Settings(GEMINI_API_KEY="k", mock=True).mock_mode is True
+
+
+def test_schema_enables_structured_output(monkeypatch):
+    from bsi.classify.llm_classifier import _Response
+
+    c, models = _client(monkeypatch, '{"results": []}')
+    c.complete("s", "u", "classify", schema=_Response)
+    cfg = models.kwargs["config"]
+    assert cfg.response_mime_type == "application/json" and cfg.response_schema is _Response
+
+
+def test_no_schema_means_plain_text(monkeypatch):
+    c, models = _client(monkeypatch, "hello")
+    c.complete("s", "u")
+    assert models.kwargs["config"].response_mime_type is None
+
+
+def test_complete_json_passes_model_as_schema():
+    from pydantic import BaseModel
+
+    from bsi.llm.client import complete_json
+
+    class M(BaseModel):
+        x: int
+
+    mock = MockClient(responses=['{"x": 1}'])
+    assert complete_json(mock, "s", "u", M).x == 1 and mock.schemas == [M]
+
+
+def test_all_llm_tasks_request_a_schema_except_free_text_v1():
+    from datetime import date
+
+    from bsi.classify.llm_classifier import LLMClassifier
+    from bsi.classify.rules import apply_rules
+    from tests.conftest_helpers import make_many
+
+    tx = make_many([("NEFT-X1-XYZ ENTERPRISES-INV", "8400", "debit", date(2024, 3, 2))])
+    apply_rules(tx)
+    m = MockClient()
+    LLMClassifier(m, "classify_v4").classify(tx)
+    assert m.schemas[0] is not None
+    tx2 = make_many([("NEFT-X1-XYZ ENTERPRISES-INV", "8400", "debit", date(2024, 3, 2))])
+    apply_rules(tx2)
+    m2 = MockClient()
+    LLMClassifier(m2, "classify_v1").classify(tx2)
+    assert m2.schemas == [None]

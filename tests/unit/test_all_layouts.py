@@ -113,8 +113,8 @@ Posting Date,Details,Withdrawals,Deposits,Closing Bal
 
 
 def test_unknown_layout_uses_llm_mapping_of_headers_only_and_code_extracts_values():
-    reply = json.dumps({"mapping": {"date": "Posting Date", "narration": "Details", "debit": "Withdrawals",
-                                    "credit": "Deposits", "balance": "Closing Bal"}, "amount_style": "split"})
+    reply = json.dumps({"date": "Posting Date", "narration": "Details", "debit": "Withdrawals",
+                         "credit": "Deposits", "balance": "Closing Bal", "amount_style": "split"})
     client = MockClient(responses=[reply])
     parsed = load_statement(UNKNOWN_CSV.encode(), "x.csv", client=client)
     assert [str(t.amount) for t in parsed.transactions] == ["200.00", "600.00"]
@@ -127,7 +127,7 @@ def test_unknown_layout_uses_llm_mapping_of_headers_only_and_code_extracts_value
 
 
 def test_bad_llm_mapping_falls_back_to_heuristic():
-    bad = json.dumps({"mapping": {"date": "Nonexistent", "narration": "Details", "amount": "Zzz"}})
+    bad = json.dumps({"date": "Nonexistent", "narration": "Details", "amount": "Zzz"})
     parsed = load_statement(UNKNOWN_CSV.encode(), "x.csv", client=MockClient(responses=[bad]))
     assert len(parsed.transactions) == 2 and any("heuristic" in w for w in parsed.warnings)
 

@@ -18,7 +18,7 @@ Map each header label (copy it exactly) to a field; omit fields that are absent.
 amount_style is "split" if separate debit and credit columns, "suffix" if a Dr/Cr marker is used,
 otherwise "signed".
 
-Reply: {"mapping": {"<field>": "<header label>"}, "amount_style": "split|signed|suffix"}
+Set each field to the exact header label that holds it, or null when absent.
 
 ```json
 {payload}
@@ -26,8 +26,22 @@ Reply: {"mapping": {"<field>": "<header label>"}, "amount_style": "split|signed|
 
 
 class ColumnMapping(BaseModel):
-    mapping: dict[str, str]
+    """Flat on purpose: a fixed set of optional keys is a valid structured-output schema."""
+
+    date: str | None = None
+    narration: str | None = None
+    ref: str | None = None
+    debit: str | None = None
+    credit: str | None = None
+    amount: str | None = None
+    balance: str | None = None
+    drcr: str | None = None
     amount_style: Literal["split", "signed", "suffix"] = "signed"
+
+    @property
+    def mapping(self) -> dict[str, str]:
+        fields = ("date", "narration", "ref", "debit", "credit", "amount", "balance", "drcr")
+        return {f: getattr(self, f) for f in fields if getattr(self, f)}
 
     @model_validator(mode="after")
     def _check(self):
@@ -67,7 +81,7 @@ def heuristic_mapping(payload: dict) -> dict:
                 break
     mapping.pop("_value_date", None)
     style = "split" if "debit" in mapping and "credit" in mapping else ("suffix" if "drcr" in mapping else "signed")
-    return {"mapping": mapping, "amount_style": style}
+    return {**mapping, "amount_style": style}
 
 
 _MONEY_FIELDS = {"debit", "credit", "amount", "balance"}
