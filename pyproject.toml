@@ -1,0 +1,40 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "bank-statement-intel"
+version = "0.1.0"
+description = "AI-assisted bank statement analyzer: deterministic parsing, LLM only for judgment and language."
+requires-python = ">=3.11"
+dependencies = [
+  "fastapi>=0.110", "uvicorn[standard]>=0.29", "python-multipart>=0.0.9",
+  "pydantic>=2.6", "pydantic-settings>=2.2",
+  "pdfplumber>=0.11", "pandas>=2.2", "openpyxl>=3.1", "PyYAML>=6.0",
+  "anthropic>=0.40",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8", "httpx>=0.27", "ruff>=0.4", "reportlab>=4.1", "Faker>=24", "pytest-cov"]
+ui = ["streamlit>=1.33", "plotly>=5.20", "httpx>=0.27"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+bsi = ["classify/*.yaml"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src", "."]
+
+[tool.ruff]
+line-length = 120
+src = ["src", "tests", "scripts", "app", "eval"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
+
+[tool.ruff.lint.per-file-ignores]
+"scripts/*" = ["E501"]
+"scripts/generators/*" = ["E501"]

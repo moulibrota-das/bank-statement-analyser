@@ -1,0 +1,19 @@
+# Fictional "Nimbus Bank": separate Debit / Credit columns, PDF, dd/mm/yy dates.
+name: layout_a_nimbus
+bank_name: Nimbus Bank
+sources: [pdf]
+amount_style: split
+date_formats: ["%d/%m/%y"]
+wrap_gap: 11
+columns:
+  - {field: date,      header: "Date",         kind: text}
+  - {field: narration, header: "Narration",    kind: text}
+  - {field: ref,       header: "Chq/Ref No",   kind: text}
+  - {field: debit,     header: "Debit",        kind: money}
+  - {field: credit,    header: "Credit",       kind: money}
+  - {field: balance,   header: "Balance",      kind: money}
+noise_patterns:
+  - "^Page \\d+ of \\d+"
+  - "Statement of Account"
+  - "computer generated"
+  - "Nimbus Bank Ltd"
