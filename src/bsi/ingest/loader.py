@@ -43,7 +43,7 @@ def _looks_like_text(data: bytes) -> bool:
     return b"\x00" not in data[:4096] and b"," in data[:4096]
 
 
-def load_statement(data: bytes, filename: str = "", layout: str | None = None) -> ParsedStatement:
+def load_statement(data: bytes, filename: str = "", layout: str | None = None, client=None) -> ParsedStatement:
     source = detect_file_type(data, filename)
     if source == "pdf":
         from bsi.parse import pdf as pdfmod
