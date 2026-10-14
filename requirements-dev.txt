@@ -1,0 +1,6 @@
+-r requirements.txt
+pytest>=8
+pytest-cov
+ruff>=0.4
+reportlab>=4.1
+Faker>=24

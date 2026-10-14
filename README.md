@@ -98,6 +98,8 @@ masked in every response.
 
 ```bash
 make install            # venv + dependencies (Python 3.11+)
+# or manually:  python3 -m venv .venv && source .venv/bin/activate
+#               pip install -r requirements-dev.txt && pip install -e . --no-deps
 cp .env.example .env    # optional: add GEMINI_API_KEY; with no key everything runs in offline mock mode
 make data               # (re)generate the synthetic statements; already committed
 ```
