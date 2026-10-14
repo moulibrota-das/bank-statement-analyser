@@ -15,7 +15,8 @@
 ## Commands
 ```
 make install   make data   make test   make lint
-fastapi dev main.py   # root main.py re-exports the app; same as make api        make ui   # streamlit on :8501
+fastapi dev main.py   # root main.py re-exports the app (same as make api, :8000)
+streamlit run app/streamlit_app.py   # UI on :8501 (same as make ui)
 make eval      # offline -> eval/results.md      make eval-live  # needs key
 python -m bsi analyze <file> --out report.json [--mock] [--no-llm] [--layout NAME] [--prompt classify_v3]
 ```
