@@ -17,12 +17,13 @@ All JSON replies use Gemini **structured output**: the request carries the pydan
 `response_schema` with `response_mime_type=application/json`, so decoding is constrained to the schema. The
 reply is still validated with pydantic and retried once on failure.
 
-The LLM is used in exactly three places; everything else is deterministic code.
+The LLM is used in exactly four places; everything else is deterministic code.
 
 | Use | Input sent | Output | Safeguards |
 |---|---|---|---|
 | Classify rows the rules could not resolve | Per row: date, narration, amount, direction, parsed channel, counterparty, optional "recurring" hint | `{id, category, confidence, rationale}` | Category constrained to the enum (pydantic); retry once on invalid JSON; confidence < 0.4 → `Other`; results cached by counterparty |
 | Propose a column mapping for an unknown layout | **Header labels only** | Which header is date / narration / debit / … | Labels validated against the file; code extracts all values; falls back to a keyword heuristic |
+| **Transcribe an image or scanned PDF** (only when there is no text layer) | **The whole image / PDF**, so it necessarily contains the account number, holder name and every transaction | Rows and header fields as strings | Prompt `extract_v1` forbids calculating or correcting and asks for the last 4 account digits only; code masks anyway, parses every date/amount, and reconciliation checks the result. Off when `use_llm=false`; unavailable in mock mode |
 | Write the 3–4 sentence narrative | A facts JSON of already-computed figures | `{"narrative": "..."}` | Every ₹ amount and % checked against the facts; regenerate once; else deterministic template |
 
 ### What is sent
@@ -32,11 +33,15 @@ The LLM is used in exactly three places; everything else is deterministic code.
 - For the summary: aggregate facts (period, totals, top categories, anomaly reasons, recurring payments).
 - For layout inference: column header labels.
 
-### What is never sent
+### What is never sent (for text PDFs, CSV and XLSX)
 
 - Account numbers (masked at parse time; the unmasked value is never stored in the data model).
 - Account holder name, IFSC, branch, or any other statement metadata.
 - Raw files, and any row the rules already classified.
+
+**Exception: images and scanned PDFs.** These cannot be parsed locally, so the full file goes to the model for
+transcription (see the table). Use a text-based PDF, CSV or XLSX if you do not want that. Every such report
+carries a warning saying so.
 
 Narration text can still contain third-party names (UPI payees) and merchant names; that is inherent to
 classifying them. In mock mode (no API key) nothing leaves the process.

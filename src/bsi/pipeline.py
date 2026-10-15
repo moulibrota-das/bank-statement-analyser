@@ -24,7 +24,8 @@ def analyze_bytes(data: bytes, filename: str = "", *, use_llm: bool = True, layo
                   cache: LLMCache | None = None) -> StatementReport:
     start = time.perf_counter()
     settings = settings or get_settings()
-    parsed = load_statement(data, filename, layout, client=client if use_llm else None)
+    llm: BaseClient | None = (client or make_client(settings)) if use_llm else None
+    parsed = load_statement(data, filename, layout, client=llm)
     meta, txns, warnings = parsed.meta, parsed.transactions, list(parsed.warnings)
     enrich(txns)
 
@@ -36,10 +37,8 @@ def analyze_bytes(data: bytes, filename: str = "", *, use_llm: bool = True, layo
     groups = detect_recurring(txns)
     apply_recurring(txns, groups)
 
-    llm: BaseClient | None = None
     calls = cache_hits = 0
-    if use_llm:
-        llm = client or make_client(settings)
+    if use_llm and llm is not None:
         stats = LLMClassifier(llm, settings.classify_prompt, cache).classify(txns, holder=meta.account_holder)
         calls, cache_hits = stats.llm_calls, stats.cache_hits
         if stats.failures:

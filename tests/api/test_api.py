@@ -57,7 +57,7 @@ def test_layout_param(client):
 
 def test_bad_extension_is_415(client):
     r = client.post("/analyze", files={"file": ("notes.txt", b"hello")})
-    assert r.status_code == 415 and "PDF, CSV or XLSX" in r.json()["detail"]
+    assert r.status_code == 415 and "PDF, CSV, XLSX or image" in r.json()["detail"]
 
 
 def test_wrong_content_for_extension_is_415(client):
@@ -175,3 +175,16 @@ def test_openapi_documents_endpoints_with_examples(client):
     assert "example" in spec["components"]["schemas"]["HealthResponse"]
     assert "StatementReport" in spec["components"]["schemas"]
     assert client.get("/docs").status_code == 200
+
+
+def test_image_upload_is_accepted_but_needs_a_real_model():
+    png = b"\x89PNG\r\n\x1a\n" + b"0" * 200
+    r = make_client().post("/analyze", files={"file": ("scan.png", png)})
+    assert r.status_code == 422 and "GEMINI_API_KEY" in r.json()["detail"]
+    r = make_client().post("/analyze", params={"use_llm": "false"}, files={"file": ("scan.png", png)})
+    assert r.status_code == 422 and "switched off" in r.json()["detail"]
+
+
+def test_image_extension_must_match_content():
+    r = make_client().post("/analyze", files={"file": ("scan.png", sample_file("nimbus_a_2024_q1").read_bytes())})
+    assert r.status_code == 415 and "does not match" in r.json()["detail"]

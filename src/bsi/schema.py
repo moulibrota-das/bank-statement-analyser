@@ -73,7 +73,7 @@ class StatementMeta(BaseModel):
     opening_balance: Money | None = None
     closing_balance: Money | None = None
     layout: str | None = None
-    source_type: Literal["pdf", "csv", "xlsx"] | None = None
+    source_type: Literal["pdf", "csv", "xlsx", "image"] | None = None
 
 
 class Transaction(BaseModel):

@@ -1,44 +1,44 @@
 """File-type detection and top-level parsing into a ParsedStatement."""
 from __future__ import annotations
 
-from dataclasses import dataclass, field
-
 from bsi.ingest.layouts import Layout, detect_layout, get_layout, load_layouts, match_header
+from bsi.ingest.loader_types import (
+    ParsedStatement,
+    UnknownLayout,
+    UnreadableFile,
+    UnsupportedFileType,
+)
 from bsi.ingest.mapping import infer_layout, looks_like_header
+from bsi.ingest.vision import extract_with_vision
 from bsi.parse.metadata import extract_metadata
 from bsi.parse.rows import build_transactions
 from bsi.parse.tabular import extract_rows, grid_to_text, read_grid
-from bsi.schema import StatementMeta, Transaction
+from bsi.schema import StatementMeta
+
+IMAGE_MIMES = {"png": "image/png", "jpeg": "image/jpeg", "webp": "image/webp"}
 
 
-class UnsupportedFileType(ValueError):
-    pass
-
-
-class UnknownLayout(ValueError):
-    pass
-
-
-class UnreadableFile(ValueError):
-    pass
-
-
-@dataclass
-class ParsedStatement:
-    meta: StatementMeta
-    transactions: list[Transaction]
-    warnings: list[str] = field(default_factory=list)
+def sniff_image(data: bytes) -> str | None:
+    if data[:8] == b"\x89PNG\r\n\x1a\n":
+        return "png"
+    if data[:3] == b"\xff\xd8\xff":
+        return "jpeg"
+    if data[:4] == b"RIFF" and data[8:12] == b"WEBP":
+        return "webp"
+    return None
 
 
 def detect_file_type(data: bytes, filename: str = "") -> str:
     if data[:5] == b"%PDF-":
         return "pdf"
+    if sniff_image(data):
+        return "image"
     if data[:4] == b"PK\x03\x04":
         return "xlsx"
     name = filename.lower()
     if name.endswith(".csv") or _looks_like_text(data):
         return "csv"
-    raise UnsupportedFileType("file is not a PDF, CSV or XLSX")
+    raise UnsupportedFileType("file is not a PDF, CSV, XLSX or image (PNG/JPG/WEBP)")
 
 
 def _looks_like_text(data: bytes) -> bool:
@@ -51,6 +51,8 @@ def _looks_like_text(data: bytes) -> bool:
 
 def load_statement(data: bytes, filename: str = "", layout: str | None = None, client=None) -> ParsedStatement:
     source = detect_file_type(data, filename)
+    if source == "image":
+        return extract_with_vision(data, IMAGE_MIMES[sniff_image(data)], client)  # type: ignore[index]
     if source == "pdf":
         return _load_pdf(data, layout, client)
     return _load_tabular(data, source, layout, client)
@@ -88,8 +90,8 @@ def _load_pdf(data: bytes, layout: str | None, client) -> ParsedStatement:
         rows = pdfmod.extract_rows(data, lay) if lay is not None else []
     except Exception as e:  # pdfminer raises a zoo of exception types on corrupt files
         raise UnreadableFile(f"could not read PDF: {type(e).__name__}") from e
-    if not text.strip():
-        raise UnreadableFile("this PDF has no text layer (scanned image?); OCR is not supported")
+    if not text.strip():  # scanned PDF: no text layer, so a vision model has to transcribe it
+        return extract_with_vision(data, "application/pdf", client)
     if rows:
         meta = extract_metadata(text, lay.date_formats)
         return _finish(meta, lay, "pdf", rows, [], how)

@@ -19,3 +19,9 @@ about model quality.
 
 ## Mock-mode results (offline stub, for pipeline verification only)
 See `eval/results.md` once generated; the header states which mode produced it.
+
+## Extraction prompt
+
+| Version | Change | Why | Live field accuracy |
+|---|---|---|---|
+| extract_v1 | Vision transcription of an image or scanned PDF into the unified structure. Copy-only rules; account number as last 4 digits only | Images have no text layer. The model only transcribes strings; code parses amounts/dates and reconciliation checks the result | TODO (no live run yet; needs real scans) |

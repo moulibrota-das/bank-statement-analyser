@@ -1,6 +1,6 @@
 # bank-statement-intel
 
-AI-assisted bank statement analyzer. Upload a PDF / CSV / XLSX statement and get structured transactions,
+AI-assisted bank statement analyzer. Upload a PDF / CSV / XLSX / image statement and get structured transactions,
 categories, spending summaries, anomaly flags and a short financial summary, via a FastAPI backend and a
 web UI.
 
@@ -64,6 +64,24 @@ flowchart LR
 | Analytics, anomaly detection | Deterministic | Aggregates, robust z-scores, explicit thresholds |
 | Narrative | **LLM** from computed facts, then verified | Language is the LLM's strength; numbers are not |
 
+## One unified structure, whatever the source
+
+Every input is normalised first into the same pair, `ParsedStatement(meta: StatementMeta, transactions:
+list[Transaction])`, before any classification or analytics. Nothing downstream knows which bank or file type
+it came from.
+
+| Input | How it is read | Notes |
+|---|---|---|
+| Text PDF, known bank layout | Column positions from the header row (`layouts/*.yaml`) | Exact |
+| Text PDF, unknown header | Header labels mapped by the LLM (labels only), values extracted by code | Warning added |
+| Text PDF, no header at all | Layout-free parser: dated rows with amounts, direction from the balance trail | Warning added |
+| CSV / XLSX | Header row located; known layout or inferred mapping | Sign convention picked by reconciliation |
+| **Image (PNG/JPG/WEBP), scanned PDF** | **Vision model transcribes strings**; code parses/normalises and masks | Warning added; whole image is sent to the model |
+
+All paths produce `Decimal` money, ISO dates, `direction`, a masked account number, and are checked by balance
+reconciliation. The image path is the one place the LLM reads values rather than judging them, so reconciliation
+is what you rely on there.
+
 ## Schema
 
 Defined in `src/bsi/schema.py` (pydantic v2; money is `Decimal`, serialised as strings).
@@ -84,7 +102,7 @@ Anomaly codes: `AMOUNT_OUTLIER`, `NEW_PAYEE_LARGE`, `ROUND_NUMBER_LARGE`, `DUPLI
 
 | Endpoint | Description |
 |---|---|
-| `POST /analyze?use_llm=true&layout=` | Multipart upload (`.pdf/.csv/.xlsx`) → `StatementReport` |
+| `POST /analyze?use_llm=true&layout=` | Multipart upload (`.pdf/.csv/.xlsx/.png/.jpg/.webp`) → `StatementReport` |
 | `POST /classify` | Raw transactions → category, source, confidence, rationale |
 | `GET /samples`, `GET /samples/{name}/analyze` | Bundled synthetic statements |
 | `GET /health` | Status, version, whether an LLM key is configured (`mode: live\|mock`) |
@@ -192,7 +210,10 @@ The web UI (`web/`) is served by the same service at `/`, so this single deploym
 - PDFs are matched against known profiles in `layouts/`, then a header-label mapping (LLM sees labels only), then a
   layout-free parser that reads any line starting with a date and carrying amounts. The last one cannot tell debit
   from credit columns, so it infers direction from the balance trail and warns; always check reconciliation.
-  Scanned/image PDFs (no OCR) and PDFs with no dated amount rows are rejected with a `422`.
+  PDFs with no dated amount rows are rejected with a `422`.
+- Images and scanned PDFs need a live Gemini key (the offline mock cannot read them); transcription errors are
+  caught only if they break the balance trail, and one that doesn't is invisible. Extraction accuracy on real
+  scans has not been measured.
 - PDF columns are located from the header row's x-positions; right-aligned numeric headers are assumed.
 - Narrations that wrap *mid-token without a `/` or `-`* are rejoined with a space.
 - Rent vs transfer to a person needs ≥2 months of data (recurring evidence) or an LLM judgment.

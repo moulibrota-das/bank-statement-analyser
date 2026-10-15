@@ -34,6 +34,10 @@ def _guess(item: dict) -> tuple[str, float, str]:
 
 
 def default_mock_reply(system: str, user: str, task: str) -> str:
+    if task == "extract":
+        from bsi.llm.client import LLMError
+
+        raise LLMError("the offline mock cannot read images; configure GEMINI_API_KEY to use image extraction")
     if task == "classify":
         m = re.search(r"```json\s*(.*?)```", user, re.DOTALL)
         if m:

@@ -4,7 +4,7 @@
   const API = (new URLSearchParams(location.search).get('api') || '').replace(/\/$/, '');
   const STEPS = ['Reading document', 'Identifying account & period', 'Extracting transactions',
     'Categorising transactions', 'Checking for unusual activity', 'Writing summary'];
-  const EXT = ['.pdf', '.csv', '.xlsx'];
+  const EXT = ['.pdf', '.csv', '.xlsx', '.png', '.jpg', '.jpeg', '.webp'];
   const $ = s => document.querySelector(s);
   const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
@@ -77,7 +77,7 @@
   function handleFile(f) {
     if (!f) return;
     const ext = '.' + f.name.split('.').pop().toLowerCase();
-    if (!EXT.includes(ext)) { state.error = 'Unsupported file type. Upload a PDF, CSV or XLSX statement.'; return render(); }
+    if (!EXT.includes(ext)) { state.error = 'Unsupported file type. Upload a PDF, CSV, XLSX or image (PNG/JPG) of your statement.'; return render(); }
     if (f.size > state.maxMb * 1048576) { state.error = `File is larger than ${state.maxMb} MB.`; return render(); }
     const fd = new FormData();
     fd.append('file', f);
@@ -116,8 +116,8 @@
   <div class="drop" id="drop" tabindex="0" role="button" aria-label="Upload a statement">
     <div class="ico">${ICON.upload}</div>
     <div class="t">Drop your statement here</div>
-    <div class="s">or <u>browse files</u> · PDF, CSV or XLSX, up to ${state.maxMb} MB</div>
-    <input type="file" id="file" accept=".pdf,.csv,.xlsx" hidden>
+    <div class="s">or <u>browse files</u> · PDF, CSV, XLSX or image, up to ${state.maxMb} MB</div>
+    <input type="file" id="file" accept=".pdf,.csv,.xlsx,.png,.jpg,.jpeg,.webp" hidden>
   </div>
   ${state.error ? `<div class="err" role="alert">${esc(state.error)}</div>` : ''}
   <div class="opts">

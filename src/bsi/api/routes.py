@@ -27,7 +27,8 @@ from bsi.schema import (
 
 log = logging.getLogger("bsi.api")
 router = APIRouter()
-ALLOWED_EXT = {".pdf", ".csv", ".xlsx"}
+ALLOWED_EXT = {".pdf", ".csv", ".xlsx", ".png", ".jpg", ".jpeg", ".webp"}
+KIND_EXT = {"pdf": {".pdf"}, "csv": {".csv"}, "xlsx": {".xlsx"}, "image": {".png", ".jpg", ".jpeg", ".webp"}}
 MAX_CLASSIFY_ROWS = 1000
 
 ERRORS = {
@@ -54,8 +55,8 @@ def _run(data: bytes, filename: str, use_llm: bool, layout: str | None, settings
 
 
 @router.post("/analyze", response_model=StatementReport, responses=ERRORS, tags=["analysis"],
-             summary="Analyze an uploaded statement (PDF, CSV or XLSX)")
-def analyze(file: UploadFile = File(..., description="Bank statement: .pdf, .csv or .xlsx"),
+             summary="Analyze an uploaded statement (PDF, CSV, XLSX or image)")
+def analyze(file: UploadFile = File(..., description="Bank statement: .pdf, .csv, .xlsx or an image (.png/.jpg/.webp)"),
             use_llm: bool = Query(True, description="Use the LLM for unresolved rows and the narrative. "
                                                     "False = deterministic rules and template only."),
             layout: str | None = Query(None, description="Force a layout profile name from layouts/"),
@@ -63,7 +64,7 @@ def analyze(file: UploadFile = File(..., description="Bank statement: .pdf, .csv
     """The upload is processed **in memory** and never written to disk. Account numbers are masked."""
     name = file.filename or ""
     if Path(name).suffix.lower() not in ALLOWED_EXT:
-        raise HTTPException(415, "Unsupported file type: upload a PDF, CSV or XLSX.")
+        raise HTTPException(415, "Unsupported file type: upload a PDF, CSV, XLSX or image (PNG/JPG/WEBP).")
     limit = settings.max_upload_mb * 1024 * 1024
     data = file.file.read(limit + 1)
     if len(data) > limit:
@@ -73,8 +74,8 @@ def analyze(file: UploadFile = File(..., description="Bank statement: .pdf, .csv
     try:
         kind = detect_file_type(data, name)
     except UnsupportedFileType:
-        raise HTTPException(415, "Unsupported file type: content is not a PDF, CSV or XLSX.") from None
-    if f".{kind}" != Path(name).suffix.lower():
+        raise HTTPException(415, "Unsupported file type: content is not a PDF, CSV, XLSX or image.") from None
+    if Path(name).suffix.lower() not in KIND_EXT[kind]:
         raise HTTPException(415, f"File extension does not match its content (looks like {kind.upper()}).")
     return _run(data, name, use_llm, layout, settings)
 

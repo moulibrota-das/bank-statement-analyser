@@ -99,3 +99,11 @@ def test_all_llm_tasks_request_a_schema_except_free_text_v1():
     m2 = MockClient()
     LLMClassifier(m2, "classify_v1").classify(tx2)
     assert m2.schemas == [None]
+
+
+def test_files_are_sent_as_parts_before_the_prompt(monkeypatch):
+    c, models = _client(monkeypatch, '{"rows": []}')
+    c.complete("s", "USER", "extract", files=[(b"\x89PNGdata", "image/png")])
+    contents = models.kwargs["contents"]
+    assert len(contents) == 2 and contents[1] == "USER"
+    assert contents[0].inline_data.mime_type == "image/png" and contents[0].inline_data.data == b"\x89PNGdata"
