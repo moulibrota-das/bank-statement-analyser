@@ -41,6 +41,12 @@ def mask_account(number: str) -> str:
     return "X" * (len(cleaned) - 4) + tail
 
 
+def find_account_numbers(text: str) -> list[str]:
+    """Raw account-number digit strings. For redaction before text leaves the process; never stored."""
+    return sorted({re.sub(r"[\s\-]", "", m.group(1)) for m in _ACCOUNT.finditer(text)
+                   if len(re.sub(r"\D", "", m.group(1))) >= 6}, key=len, reverse=True)
+
+
 def _first(rx: re.Pattern[str], text: str) -> str | None:
     m = rx.search(text)
     return m.group(1).strip() if m else None

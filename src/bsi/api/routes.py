@@ -16,6 +16,7 @@ from bsi.config import Settings
 from bsi.enrich.narration import enrich
 from bsi.ingest.layouts import load_layouts
 from bsi.ingest.loader import UnknownLayout, UnreadableFile, UnsupportedFileType, detect_file_type
+from bsi.ingest.loader_types import NotAStatement
 from bsi.llm.client import make_client
 from bsi.pipeline import analyze_bytes
 from bsi.schema import (
@@ -44,6 +45,8 @@ def _run(data: bytes, filename: str, use_llm: bool, layout: str | None, settings
         return analyze_bytes(data, filename, use_llm=use_llm, layout=layout, settings=settings)
     except UnsupportedFileType as e:
         raise HTTPException(415, f"Unsupported file type: {e}") from e
+    except NotAStatement as e:
+        raise HTTPException(422, str(e)) from e
     except (UnknownLayout, UnreadableFile) as e:
         raise HTTPException(422, f"Could not parse statement: {e}") from e
     except KeyError as e:

@@ -67,20 +67,56 @@ def _row_amount(r: ExtractedRow) -> tuple | None:
     return None
 
 
-def extract_with_vision(data: bytes, mime: str, client: LLMClient | None) -> ParsedStatement:
-    if client is None:
-        raise UnreadableFile("this file has no text layer and needs AI extraction, which is switched off")
+CHUNK_CHARS = 20000
+
+
+def chunk_text(text: str, max_chars: int = CHUNK_CHARS) -> list[str]:
+    """Split on line boundaries so each LLM call stays well inside the output limit."""
+    chunks, cur, size = [], [], 0
+    for line in text.splitlines():
+        if size + len(line) + 1 > max_chars and cur:
+            chunks.append("\n".join(cur))
+            cur, size = [], 0
+        cur.append(line)
+        size += len(line) + 1
+    if cur:
+        chunks.append("\n".join(cur))
+    return chunks or [""]
+
+
+def _ask(client: LLMClient, user_suffix: str = "", files=None) -> ExtractedStatement:
     prompt = load_prompt("extract_v1")
     try:
-        ex = complete_json(client, prompt.system, prompt.render_user(), ExtractedStatement, task="extract",
-                           files=[(data, mime)])
+        return complete_json(client, prompt.system, prompt.render_user() + user_suffix, ExtractedStatement,
+                             task="extract", files=files)
     except LLMError as e:
-        raise UnreadableFile(f"could not read this image with the AI model: {e}") from e
+        raise UnreadableFile(f"could not read this document with the AI model: {e}") from e
 
+
+def extract_with_vision(data: bytes, mime: str, client: LLMClient | None) -> ParsedStatement:
+    """Images and scanned PDFs: the file itself goes to the model."""
+    if client is None:
+        raise UnreadableFile("this file has no text layer and needs AI extraction, which is switched off")
+    return _to_parsed([_ask(client, files=[(data, mime)])],
+                      "Read from an image by an AI model: figures were transcribed, not parsed from text. "
+                      "The whole image was sent to the model. Check the reconciliation result.")
+
+
+def extract_text_with_llm(text: str, client: LLMClient, layout_name: str = "ai-text") -> ParsedStatement:
+    """Text documents (any bank, any layout): the redacted text goes to the model in chunks."""
+    parts = [_ask(client, "\n\nDocument text:\n```text\n" + chunk + "\n```") for chunk in chunk_text(text)]
+    return _to_parsed(parts, "Layout not recognised: rows were extracted from the document text by an AI model "
+                             "(account number masked and holder name removed first). Check the reconciliation result.",
+                      layout=layout_name, source=None)
+
+
+def _to_parsed(parts: list[ExtractedStatement], warning: str, layout: str = "ai-vision",
+               source: str | None = "image") -> ParsedStatement:
+    ex = parts[0]
+    rows = [r for p in parts for r in p.rows]
     txns: list[Transaction] = []
-    warnings = ["Read from an image by an AI model: figures were transcribed, not parsed from text. "
-                "The whole image was sent to the model. Check the reconciliation result."]
-    for n, r in enumerate(ex.rows, start=1):
+    warnings = [warning]
+    for n, r in enumerate(rows, start=1):
         try:
             when, resolved = _date(r.date), _row_amount(r)
             if when is None or resolved is None:
@@ -91,7 +127,7 @@ def extract_with_vision(data: bytes, mime: str, client: LLMClient | None) -> Par
         except ValueError as e:
             warnings.append(f"row {n}: could not parse ({e}); skipped")
     if not txns:
-        raise UnreadableFile("no transactions could be read from this image (is it a bank statement?)")
+        raise UnreadableFile("no transactions could be read from this document (is it a bank statement?)")
 
     digits = re.sub(r"\D", "", ex.account_last4 or "")
     masked = None
@@ -102,7 +138,7 @@ def extract_with_vision(data: bytes, mime: str, client: LLMClient | None) -> Par
         account_number_masked=masked,
         period_start=_date(ex.period_start), period_end=_date(ex.period_end),
         opening_balance=_money_safe(ex.opening_balance), closing_balance=_money_safe(ex.closing_balance),
-        layout="ai-vision", source_type="image")
+        layout=layout, source_type=source)  # type: ignore[arg-type]
     return ParsedStatement(meta, txns, warnings)
 
 

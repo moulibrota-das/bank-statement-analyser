@@ -104,21 +104,3 @@ def test_pipeline_runs_end_to_end_on_an_image():
     rep = analyze_bytes(PNG, "scan.png", client=MockClient(handler=handler))
     assert len(rep.transactions) == 3 and rep.reconciliation.passed and rep.meta.source_type == "image"
     assert rep.summary.narrative and any("image by an AI model" in w for w in rep.warnings)
-
-
-def test_pipeline_gives_the_llm_client_to_unknown_layout_mapping():
-    """Regression: the client used to be created after parsing, so the mapping never reached the LLM."""
-    csv = (b"Posting Date,Details,Withdrawals,Deposits,Closing Bal\n"
-           b"05/03/2024,SWIGGY,200.00,,800.00\n06/03/2024,SALARY,,600.00,1400.00\n")
-    tasks = []
-
-    def handler(system, user, task):
-        tasks.append(task)
-        if task == "mapping":
-            return json.dumps({"date": "Posting Date", "narration": "Details", "debit": "Withdrawals",
-                               "credit": "Deposits", "balance": "Closing Bal", "amount_style": "split"})
-        from bsi.llm.mock import default_mock_reply
-        return default_mock_reply(system, user, task)
-
-    rep = analyze_bytes(csv, "x.csv", client=MockClient(handler=handler))
-    assert "mapping" in tasks and any("inferred by llm" in w for w in rep.warnings)

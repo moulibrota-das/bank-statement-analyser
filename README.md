@@ -64,6 +64,19 @@ flowchart LR
 | Analytics, anomaly detection | Deterministic | Aggregates, robust z-scores, explicit thresholds |
 | Narrative | **LLM** from computed facts, then verified | Language is the LLM's strength; numbers are not |
 
+## The LLM works in three phases
+
+```
+Phase 1  Document check   LLM  Is this a bank statement at all? (credit-card bills, invoices, letters are rejected with a reason)
+Phase 2  Extraction       Exact parser if a known layout matches; otherwise the LLM extracts into the unified structure
+Phase 3  Analysis         Categorise unresolved rows (LLM) · analytics · anomaly flags (rules) · verified summary (LLM)
+```
+
+Phase 1 sees a redacted excerpt (or the image itself); a failed or unsure check never blocks, it adds a warning.
+In Phase 2 the LLM runs only when no known layout matches, and its output is cross-checked: if it does not
+reconcile but a heuristic parse does, the heuristic parse wins. Each phase is recorded in
+`processing.phases` and the verdict in `document_check` on every report.
+
 ## One unified structure, whatever the source
 
 Every input is normalised first into the same pair, `ParsedStatement(meta: StatementMeta, transactions:
@@ -73,9 +86,8 @@ it came from.
 | Input | How it is read | Notes |
 |---|---|---|
 | Text PDF, known bank layout | Column positions from the header row (`layouts/*.yaml`) | Exact |
-| Text PDF, unknown header | Header labels mapped by the LLM (labels only), values extracted by code | Warning added |
-| Text PDF, no header at all | Layout-free parser: dated rows with amounts, direction from the balance trail | Warning added |
-| CSV / XLSX | Header row located; known layout or inferred mapping | Sign convention picked by reconciliation |
+| Text PDF / CSV / XLSX, unknown layout | **LLM extracts rows from the redacted text** (account number masked, holder name removed) | Warning added; cross-checked against a heuristic parse |
+| Same, AI off or offline mock | Header-label mapping, else a layout-free parser (dated rows + amounts, direction from the balance trail) | Warning added |
 | **Image (PNG/JPG/WEBP), scanned PDF** | **Vision model transcribes strings**; code parses/normalises and masks | Warning added; whole image is sent to the model |
 
 All paths produce `Decimal` money, ISO dates, `direction`, a masked account number, and are checked by balance

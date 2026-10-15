@@ -33,7 +33,25 @@ def _guess(item: dict) -> tuple[str, float, str]:
     return "Other", 0.3, "no clear signal"
 
 
+def _mock_gate(user: str) -> dict:
+    """Offline stand-in for the document check: counts dated rows that carry an amount."""
+    from bsi.llm.client import LLMError
+
+    m = re.search(r"```text\s*(.*?)```", user, re.DOTALL)
+    if not m:
+        raise LLMError("the offline mock cannot look at images")
+    date = re.compile(r"\d{1,2}[-/ .](?:\d{1,2}|[A-Za-z]{3})[-/ .]\d{2,4}|\d{4}-\d{2}-\d{2}")
+    money = re.compile(r"\d[\d,]*\.\d{2}|\b\d{3,}\b")
+    rows = [ln for ln in m.group(1).splitlines() if date.search(ln) and money.search(ln)]
+    ok = len(rows) >= 2
+    return {"is_bank_statement": ok, "confidence": 0.8 if ok else 0.7,
+            "document_type": "bank_statement" if ok else "other",
+            "reason": f"{len(rows)} dated rows with amounts found" if ok else "no table of dated amounts found"}
+
+
 def default_mock_reply(system: str, user: str, task: str) -> str:
+    if task == "gate":
+        return json.dumps(_mock_gate(user))
     if task == "extract":
         from bsi.llm.client import LLMError
 

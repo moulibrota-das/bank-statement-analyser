@@ -6,8 +6,9 @@
   the narrative from pre-computed facts. Never let the LLM produce a number that is not verified.
 - **Money is `Decimal`**, never `float`. Serialised as strings. Amounts are positive; `direction` carries sign.
 - **Synthetic data only.** No real banking data, ever. Never commit `.env` or API keys.
-- **One exception to deterministic-first:** images/scanned PDFs are transcribed by a vision model (`ingest/vision.py`);
-  code still parses every value, masks the account number, and reconciliation must verify the result.
+- **LLM phases** (`ingest/phases.py`): (1) document check, (2) extraction, (3) analysis. Phase 2 uses an exact parser
+  when a known layout matches and the LLM otherwise (text or vision, `ingest/vision.py`); either way code parses every
+  value, masks the account number, redacts text before sending, and reconciliation must verify the result.
 - **Mask account numbers** to the last 4 digits at parse time; never send account numbers or holder names to
   the LLM; do not log statement content.
 - **Never hide reconciliation mismatches or fabricate eval numbers.** Unmeasured live scores stay `TODO`.

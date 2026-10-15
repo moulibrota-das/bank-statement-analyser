@@ -60,7 +60,7 @@ class BaseClient:
 class GeminiClient(BaseClient):
     name = "gemini"
 
-    def __init__(self, api_key: str, model: str, max_tokens: int = 4096) -> None:
+    def __init__(self, api_key: str, model: str, max_tokens: int = 32768) -> None:
         super().__init__()
         from google import genai
 

@@ -183,12 +183,31 @@ class NarrativeSummary(BaseModel):
     faithfulness_passed: bool
 
 
+class DocumentCheck(BaseModel):
+    """Phase 1: is this document a bank statement at all?"""
+
+    is_bank_statement: bool
+    confidence: float = Field(ge=0, le=1)
+    document_type: str
+    reason: str
+    method: Literal["llm", "heuristic", "skipped", "unavailable"]
+
+
+class PhaseInfo(BaseModel):
+    name: Literal["document_check", "extraction", "analysis"]
+    method: str
+    detail: str = ""
+    llm_calls: int = 0
+    seconds: float = 0.0
+
+
 class ProcessingInfo(BaseModel):
     mock_mode: bool
     llm_calls: int = 0
     cache_hits: int = 0
     prompt_version: str | None = None
     elapsed_ms: int = 0
+    phases: list[PhaseInfo] = []
 
 
 class StatementReport(BaseModel):
@@ -210,6 +229,7 @@ class StatementReport(BaseModel):
         "processing": {"mock_mode": True, "llm_calls": 2, "cache_hits": 0, "prompt_version": "classify_v4",
                        "elapsed_ms": 240},
         "warnings": [], "analytics": "(abridged in this example)", "summary": "(abridged in this example)"}})
+    document_check: DocumentCheck | None = None
     meta: StatementMeta
     transactions: list[Transaction]
     reconciliation: ReconciliationResult

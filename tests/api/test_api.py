@@ -185,6 +185,25 @@ def test_image_upload_is_accepted_but_needs_a_real_model():
     assert r.status_code == 422 and "switched off" in r.json()["detail"]
 
 
+def test_a_document_that_is_not_a_statement_is_rejected_with_the_reason():
+    import io
+
+    from reportlab.pdfgen import canvas
+
+    buf = io.BytesIO()
+    c = canvas.Canvas(buf)
+    c.drawString(72, 700, "Dear customer, your insurance policy renews next month.")
+    c.save()
+    r = make_client().post("/analyze", files={"file": ("letter.pdf", buf.getvalue())})
+    assert r.status_code == 422 and "doesn't look like a bank statement" in r.json()["detail"]
+
+
+def test_report_includes_document_check_and_phases(client):
+    body = upload(client, sample_file("nimbus_a_2024_03")).json()
+    assert body["document_check"]["is_bank_statement"] is True
+    assert [p["name"] for p in body["processing"]["phases"]] == ["document_check", "extraction", "analysis"]
+
+
 def test_image_extension_must_match_content():
     r = make_client().post("/analyze", files={"file": ("scan.png", sample_file("nimbus_a_2024_q1").read_bytes())})
     assert r.status_code == 415 and "does not match" in r.json()["detail"]

@@ -2,8 +2,8 @@
 (function () {
   const { CATS, COLOR, inr } = window.SA;
   const API = (new URLSearchParams(location.search).get('api') || '').replace(/\/$/, '');
-  const STEPS = ['Reading document', 'Identifying account & period', 'Extracting transactions',
-    'Categorising transactions', 'Checking for unusual activity', 'Writing summary'];
+  const STEPS = ['Checking this is a bank statement', 'Extracting transactions', 'Categorising transactions',
+    'Checking for unusual activity', 'Writing summary'];
   const EXT = ['.pdf', '.csv', '.xlsx', '.png', '.jpg', '.jpeg', '.webp'];
   const $ = s => document.querySelector(s);
   const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -136,12 +136,12 @@
   function stepDetail(i) {
     const r = state.report;
     if (!r) return '';
-    const m = r.meta, n = r.transactions.length;
+    const phase = n => (r.processing.phases || []).find(p => p.name === n);
+    const n = r.transactions.length, cats = new Set(r.transactions.map(t => t.category)).size;
     return [
-      (m.source_type || 'file').toUpperCase() + ' · layout ' + (m.layout || 'detected'),
-      [m.bank_name, m.account_number_masked, m.period_start && m.period_end ? m.period_start + ' – ' + m.period_end : ''].filter(Boolean).join(' · '),
-      n + ' transactions · ' + (r.reconciliation.passed ? 'balances reconciled' : 'balances DID NOT reconcile'),
-      new Set(r.transactions.map(t => t.category)).size + ' categories assigned',
+      phase('document_check') ? phase('document_check').detail : 'Bank statement',
+      phase('extraction') ? `${phase('extraction').method} · ${phase('extraction').detail}` : n + ' transactions',
+      cats + ' categories assigned',
       r.anomalies.length + (r.anomalies.length === 1 ? ' item' : ' items') + ' flagged for review',
       'Ready'][i];
   }

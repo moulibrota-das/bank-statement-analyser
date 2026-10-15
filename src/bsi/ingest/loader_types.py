@@ -18,6 +18,10 @@ class UnreadableFile(ValueError):
     pass
 
 
+class NotAStatement(ValueError):
+    pass
+
+
 @dataclass
 class ParsedStatement:
     meta: StatementMeta

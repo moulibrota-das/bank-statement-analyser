@@ -7,6 +7,7 @@ from pathlib import Path
 
 from bsi.config import Settings
 from bsi.ingest.loader import UnknownLayout, UnreadableFile, UnsupportedFileType
+from bsi.ingest.loader_types import NotAStatement
 from bsi.pipeline import analyze_bytes
 
 
@@ -35,7 +36,7 @@ def main(argv: list[str] | None = None) -> int:
     try:
         report = analyze_bytes(args.file.read_bytes(), args.file.name, use_llm=not args.no_llm,
                                layout=args.layout, settings=settings)
-    except (UnknownLayout, UnreadableFile, UnsupportedFileType, FileNotFoundError, KeyError) as e:
+    except (NotAStatement, UnknownLayout, UnreadableFile, UnsupportedFileType, FileNotFoundError, KeyError) as e:
         print(f"error: {e}", file=sys.stderr)
         return 2
     args.out.write_text(report.model_dump_json(indent=2))
