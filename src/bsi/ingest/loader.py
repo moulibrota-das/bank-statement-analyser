@@ -75,22 +75,33 @@ def _finish(meta: StatementMeta, lay: Layout, source: str, rows, warnings: list[
 
 def _load_pdf(data: bytes, layout: str | None, client) -> ParsedStatement:
     from bsi.parse import pdf as pdfmod
+    from bsi.parse.generic import extract_generic
 
     try:
         lay: Layout | None = get_layout(layout) if layout else pdfmod.detect_pdf_layout(data)
+        text = pdfmod.extract_text(data)
+        how = None
+        if lay is None:
+            headers = pdfmod.guess_header_labels(data)
+            if headers is not None:
+                lay, how = infer_layout(headers, "pdf", client)
+        rows = pdfmod.extract_rows(data, lay) if lay is not None else []
     except Exception as e:  # pdfminer raises a zoo of exception types on corrupt files
         raise UnreadableFile(f"could not read PDF: {type(e).__name__}") from e
-    how = None
-    if lay is None:
-        headers = pdfmod.guess_header_labels(data)
-        if headers is None:
-            raise UnknownLayout("no layout profile matches this PDF and no transaction table header was found")
-        lay, how = infer_layout(headers, "pdf", client)
-    meta = extract_metadata(pdfmod.extract_text(data), lay.date_formats)
-    rows = pdfmod.extract_rows(data, lay)
-    if not rows:
-        raise UnknownLayout("a transaction table header was found but no transaction rows could be read")
-    return _finish(meta, lay, "pdf", rows, [], how)
+    if not text.strip():
+        raise UnreadableFile("this PDF has no text layer (scanned image?); OCR is not supported")
+    if rows:
+        meta = extract_metadata(text, lay.date_formats)
+        return _finish(meta, lay, "pdf", rows, [], how)
+    # No usable layout or header: do not reject, parse by date + amount tokens instead.
+    meta = extract_metadata(text)
+    txns, warnings = extract_generic(data, meta.opening_balance)
+    if not txns:
+        raise UnknownLayout("no transactions could be extracted from this PDF (no dated rows with amounts found)")
+    meta.layout, meta.source_type, meta.bank_name = "generic", "pdf", meta.bank_name
+    warnings.insert(0, "Layout not recognised: transactions were read with a generic line parser. "
+                       "Check the reconciliation result before trusting the numbers.")
+    return ParsedStatement(meta, txns, warnings)
 
 
 def _load_tabular(data: bytes, source: str, layout: str | None, client) -> ParsedStatement:

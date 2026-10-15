@@ -189,8 +189,10 @@ The web UI (`web/`) is served by the same service at `/`, so this single deploym
 
 ## Limitations
 
-- Layouts are matched against known profiles in `layouts/`; the LLM mapping fallback only reads **header
-  labels**, so headerless or unusual tables fail with `422`. Scanned/image PDFs (no OCR) are unsupported.
+- PDFs are matched against known profiles in `layouts/`, then a header-label mapping (LLM sees labels only), then a
+  layout-free parser that reads any line starting with a date and carrying amounts. The last one cannot tell debit
+  from credit columns, so it infers direction from the balance trail and warns; always check reconciliation.
+  Scanned/image PDFs (no OCR) and PDFs with no dated amount rows are rejected with a `422`.
 - PDF columns are located from the header row's x-positions; right-aligned numeric headers are assumed.
 - Narrations that wrap *mid-token without a `/` or `-`* are rejoined with a space.
 - Rent vs transfer to a person needs ≥2 months of data (recurring evidence) or an LLM judgment.

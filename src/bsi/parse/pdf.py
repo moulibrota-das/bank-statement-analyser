@@ -17,6 +17,7 @@ from bsi.parse.amounts import looks_like_money
 from bsi.parse.dates import DATE_RE, try_parse_date
 
 Y_TOL = 3.0
+WRAP_GAP = 11.0  # max vertical gap (pt) for a wrapped narration line in layout-free parsing
 MONEY_X_TOL = 28.0  # wide enough for a trailing 'Dr'/'Cr' marker; money columns are far apart
 
 
