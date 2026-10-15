@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Statement Analyser</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="app">
+  <header class="top">
+    <button class="brand" id="home" aria-label="Statement Analyser home">
+      <div class="logo"><span></span><span></span><span></span></div><b>Statement Analyser</b>
+    </button>
+    <div class="secure">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 018 0v3"/></svg>
+      <span>Processed in memory · never stored</span><span id="mock" class="chip-mock" hidden>Mock AI</span>
+    </div>
+  </header>
+  <div id="view"></div>
+</div>
+<script src="model.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

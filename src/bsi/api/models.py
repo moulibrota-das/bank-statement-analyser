@@ -13,6 +13,7 @@ class HealthResponse(BaseModel):
     mode: str  # "live" | "mock"
     model: str
     classify_prompt: str
+    max_upload_mb: int = 10
 
 
 class SampleInfo(BaseModel):

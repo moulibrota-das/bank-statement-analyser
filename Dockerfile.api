@@ -5,6 +5,7 @@ COPY src ./src
 COPY layouts ./layouts
 COPY prompts ./prompts
 COPY data ./data
+COPY web ./web
 RUN pip install --no-cache-dir -e .
 ENV PORT=8000
 EXPOSE 8000

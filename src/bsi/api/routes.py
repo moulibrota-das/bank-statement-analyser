@@ -132,4 +132,4 @@ def analyze_sample(name: str, use_llm: bool = Query(True), settings: Settings = 
 def health(settings: Settings = Depends(settings_dep)):
     return HealthResponse(status="ok", version=__version__, llm_configured=bool(settings.gemini_api_key),
                           mode="mock" if settings.mock_mode else "live", model=settings.llm_model,
-                          classify_prompt=settings.classify_prompt)
+                          classify_prompt=settings.classify_prompt, max_upload_mb=settings.max_upload_mb)

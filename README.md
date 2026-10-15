@@ -121,9 +121,11 @@ python -m bsi analyze data/synthetic/nimbus_a_2024_q1.pdf --out report.json --mo
 python -m bsi analyze statement.csv --no-llm          # rules + template only
 python -m bsi analyze statement.pdf --prompt classify_v3
 
-# API (http://localhost:8000/docs) and UI (http://localhost:8501), in two terminals
+# Web UI + API in one process: http://localhost:8000 (UI) and /docs (Swagger)
 fastapi dev main.py        # or: uvicorn main:app --reload
-streamlit run app/streamlit_app.py   # same as: make ui
+
+# optional: the older Streamlit UI (needs the API running)
+streamlit run app/streamlit_app.py
 
 # or both with Docker
 docker compose up --build
@@ -182,15 +184,16 @@ compares them. v1 naive free text → v2 fixed list + JSON schema → v3 few-sho
 
 ## Deployment
 
-**API on Render** (Railway is analogous):
+**API + web UI on Render** (Railway is analogous):
 1. New *Web Service* from this repo, runtime *Docker*, Dockerfile path `Dockerfile.api`.
 2. Env vars: `GEMINI_API_KEY` (omit for mock mode), `BSI_CORS_ORIGINS=https://<your-app>.streamlit.app`.
 3. The container listens on `$PORT`; health check path `/health`.
 
-**UI on Streamlit Community Cloud:**
-1. New app from this repo, main file `app/streamlit_app.py`, requirements `app/requirements.txt`.
-2. In *Secrets/Environment* set `API_BASE_URL=https://<your-render-service>.onrender.com`.
-3. Free-tier APIs sleep when idle; the first request can take ~30 s.
+The web UI (`web/`) is served by the same service at `/`, so this single deployment is the whole app.
+
+**Optional: Streamlit UI on Streamlit Community Cloud** (legacy front-end): main file `app/streamlit_app.py`,
+requirements `app/requirements.txt`, env `API_BASE_URL=https://<your-render-service>.onrender.com`.
+Free-tier APIs sleep when idle; the first request can take ~30 s.
 
 ## Limitations
 

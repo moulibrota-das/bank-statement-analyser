@@ -1,11 +1,16 @@
 from __future__ import annotations
 
+from pathlib import Path
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 
 from bsi import __version__
 from bsi.api.routes import router
 from bsi.config import get_settings
+
+WEB_DIR = Path(__file__).resolve().parents[3] / "web"
 
 DESCRIPTION = """
 Turns a bank statement (PDF/CSV/XLSX) into structured transactions, categories, spending summaries,
@@ -26,6 +31,8 @@ def create_app() -> FastAPI:
     app.add_middleware(CORSMiddleware, allow_origins=s.cors_list, allow_methods=["GET", "POST"],
                        allow_headers=["*"])
     app.include_router(router)
+    if WEB_DIR.is_dir():  # the web UI is served last so it never shadows an API route
+        app.mount("/", StaticFiles(directory=WEB_DIR, html=True), name="web")
     return app
 
 
