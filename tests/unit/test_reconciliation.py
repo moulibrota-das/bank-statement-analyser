@@ -52,3 +52,19 @@ def test_missing_running_balance_flagged():
     rows[1] = Transaction(**{**rows[1].model_dump(), "balance": None})
     r = reconcile(META, rows)
     assert any(i.kind == "missing_balance" and i.idx == 1 for i in r.issues)
+
+
+def test_row_without_printed_balance_does_not_break_the_next_row_check():
+    rows = [tx(0, "100", Direction.DEBIT, "900"), Transaction(**{**tx(1, "50", Direction.DEBIT, "850").model_dump(),
+                                                                "balance": None}),
+            tx(2, "25", Direction.DEBIT, "825")]
+    r = reconcile(StatementMeta(opening_balance=D("1000"), closing_balance=D("825")), rows)
+    assert [i.kind for i in r.issues] == ["missing_balance"]  # row 1 is unverifiable, but row 2 is not blamed
+
+
+def test_a_genuinely_wrong_row_after_a_balanceless_row_is_still_caught():
+    rows = [tx(0, "100", Direction.DEBIT, "900"), Transaction(**{**tx(1, "50", Direction.DEBIT, "850").model_dump(),
+                                                                "balance": None}),
+            tx(2, "25", Direction.DEBIT, "800")]
+    r = reconcile(StatementMeta(opening_balance=D("1000")), rows)
+    assert any(i.kind == "running_balance" and i.idx == 2 for i in r.issues)

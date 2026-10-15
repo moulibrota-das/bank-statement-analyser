@@ -35,6 +35,8 @@ def reconcile(meta: StatementMeta, txns: list[Transaction]) -> ReconciliationRes
                 issues.append(ReconciliationIssue(
                     idx=t.idx, kind="missing_balance",
                     message=f"row {t.idx} has no running balance"))
+            if prev is not None:
+                prev = prev + _signed(t)  # carry its amount, so the next printed balance is still checkable
             continue
         if prev is not None:
             expected = prev + _signed(t)
