@@ -2,7 +2,7 @@
 
 AI-assisted bank statement analyzer. Upload a PDF / CSV / XLSX statement and get structured transactions,
 categories, spending summaries, anomaly flags and a short financial summary, via a FastAPI backend and a
-Streamlit UI.
+web UI.
 
 > **All data in this repo is synthetic.** Fictional banks, people, account numbers and IFSC codes. No real
 > banking data is used anywhere.
@@ -11,7 +11,7 @@ Streamlit UI.
 |---|---|
 | Screenshots | _TODO: add `docs/screenshots/*.png`_ |
 | Demo video | _TODO: add link_ |
-| Live API / UI | _TODO: add Render/Railway and Streamlit Cloud URLs after deploying_ |
+| Live API / UI | _TODO: add Render/Railway URL after deploying_ |
 
 ## The problem
 
@@ -110,8 +110,7 @@ make data               # (re)generate the synthetic statements; already committ
 | `BSI_MOCK` | Force mock (`1`) or live (`0`) | auto |
 | `BSI_LLM_MODEL` | Gemini model id (check it is available to your key) | `gemini-2.5-flash` |
 | `BSI_CLASSIFY_PROMPT` / `BSI_SUMMARY_PROMPT` | Prompt versions | `classify_v4` / `summary_v2` |
-| `BSI_MAX_UPLOAD_MB`, `BSI_CORS_ORIGINS` | API limits / CORS | `10`, `http://localhost:8501` |
-| `API_BASE_URL` | UI → API address | `http://localhost:8000` |
+| `BSI_MAX_UPLOAD_MB`, `BSI_CORS_ORIGINS` | Upload limit; extra CORS origins (the bundled UI is same-origin) | `10`, none |
 
 ## Usage
 
@@ -124,10 +123,7 @@ python -m bsi analyze statement.pdf --prompt classify_v3
 # Web UI + API in one process: http://localhost:8000 (UI) and /docs (Swagger)
 fastapi dev main.py        # or: uvicorn main:app --reload
 
-# optional: the older Streamlit UI (needs the API running)
-streamlit run app/streamlit_app.py
-
-# or both with Docker
+# or with Docker
 docker compose up --build
 ```
 
@@ -186,14 +182,10 @@ compares them. v1 naive free text → v2 fixed list + JSON schema → v3 few-sho
 
 **API + web UI on Render** (Railway is analogous):
 1. New *Web Service* from this repo, runtime *Docker*, Dockerfile path `Dockerfile.api`.
-2. Env vars: `GEMINI_API_KEY` (omit for mock mode), `BSI_CORS_ORIGINS=https://<your-app>.streamlit.app`.
+2. Env vars: `GEMINI_API_KEY` (omit for mock mode), `BSI_CORS_ORIGINS` only if you host the UI elsewhere.
 3. The container listens on `$PORT`; health check path `/health`.
 
 The web UI (`web/`) is served by the same service at `/`, so this single deployment is the whole app.
-
-**Optional: Streamlit UI on Streamlit Community Cloud** (legacy front-end): main file `app/streamlit_app.py`,
-requirements `app/requirements.txt`, env `API_BASE_URL=https://<your-render-service>.onrender.com`.
-Free-tier APIs sleep when idle; the first request can take ~30 s.
 
 ## Limitations
 

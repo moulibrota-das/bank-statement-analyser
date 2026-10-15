@@ -9,14 +9,13 @@
 - **Mask account numbers** to the last 4 digits at parse time; never send account numbers or holder names to
   the LLM; do not log statement content.
 - **Never hide reconciliation mismatches or fabricate eval numbers.** Unmeasured live scores stay `TODO`.
-- The Streamlit app talks to the API over HTTP only; it must not import `bsi`.
+- The web UI (`web/`, plain HTML/JS) talks to the API over HTTP only; keep pure logic in `web/model.js` (tested with node).
 - Everything must run offline in mock mode (no `GEMINI_API_KEY`), including all tests.
 
 ## Commands
 ```
 make install   make data   make test   make lint
 fastapi dev main.py   # API + the web UI (web/) on :8000; root main.py re-exports the app
-streamlit run app/streamlit_app.py   # legacy Streamlit UI on :8501 (optional)
 node --test tests/web/   # needs REPORT_JSON; normally run via pytest
 make eval      # offline -> eval/results.md      make eval-live  # needs key
 python -m bsi analyze <file> --out report.json [--mock] [--no-llm] [--layout NAME] [--prompt classify_v3]

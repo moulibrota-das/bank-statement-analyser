@@ -161,10 +161,12 @@ def test_classify_validation(client):
     assert client.post("/classify", json=bad).status_code == 422
 
 
-def test_cors_allows_configured_origin():
+def test_cors_allows_configured_origin(monkeypatch):
+    monkeypatch.setenv("BSI_CORS_ORIGINS", "http://localhost:3000")
     c = make_client()
-    r = c.get("/health", headers={"Origin": "http://localhost:8501"})
-    assert r.headers.get("access-control-allow-origin") == "http://localhost:8501"
+    r = c.get("/health", headers={"Origin": "http://localhost:3000"})
+    assert r.headers.get("access-control-allow-origin") == "http://localhost:3000"
+    assert "access-control-allow-origin" not in c.get("/health", headers={"Origin": "http://evil.example"}).headers
 
 
 def test_openapi_documents_endpoints_with_examples(client):

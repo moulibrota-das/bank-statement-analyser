@@ -1,18 +1,9 @@
 services:
-  api:
+  app:   # API + web UI on one port
     build: { context: ., dockerfile: Dockerfile.api }
     env_file: [{ path: .env, required: false }]   # GEMINI_API_KEY optional: no key = mock mode
-    environment:
-      BSI_CORS_ORIGINS: http://localhost:8501
     ports: ["8000:8000"]
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request as u; u.urlopen('http://localhost:8000/health')"]
       interval: 10s
       retries: 5
-  ui:
-    build: { context: ., dockerfile: Dockerfile.ui }
-    environment:
-      API_BASE_URL: http://api:8000
-    ports: ["8501:8501"]
-    depends_on:
-      api: { condition: service_healthy }

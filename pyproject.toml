@@ -10,13 +10,12 @@ requires-python = ">=3.11"
 dependencies = [
   "fastapi[standard]>=0.112", "python-multipart>=0.0.9",
   "pydantic>=2.6", "pydantic-settings>=2.2",
-  "pdfplumber>=0.11", "pandas>=2.2", "openpyxl>=3.1", "PyYAML>=6.0",
+  "pdfplumber>=0.11", "openpyxl>=3.1", "PyYAML>=6.0",
   "google-genai>=1.0",
 ]
 
 [project.optional-dependencies]
 dev = ["pytest>=8", "httpx>=0.27", "ruff>=0.4", "reportlab>=4.1", "Faker>=24", "pytest-cov"]
-ui = ["streamlit>=1.33", "plotly>=5.20", "httpx>=0.27"]
 
 [tool.setuptools.packages.find]
 where = ["src"]
@@ -42,4 +41,3 @@ extend-immutable-calls = ["fastapi.Depends", "fastapi.File", "fastapi.Query"]
 "scripts/*" = ["E501"]
 "scripts/generators/*" = ["E501"]
 "eval/*" = ["E501"]
-"app/*" = ["E501"]

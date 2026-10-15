@@ -17,7 +17,7 @@ class Settings(BaseSettings):
     classify_prompt: str = "classify_v4"
     summary_prompt: str = "summary_v2"
     max_upload_mb: int = 10
-    cors_origins: str = "http://localhost:8501"
+    cors_origins: str = ""  # the bundled web UI is same-origin; list origins only for a separate front-end
     layouts_dir: Path = ROOT / "layouts"
     prompts_dir: Path = ROOT / "prompts"
     samples_dir: Path = ROOT / "data" / "synthetic"
