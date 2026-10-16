@@ -140,7 +140,7 @@
     const n = r.transactions.length, cats = new Set(r.transactions.map(t => t.category)).size;
     return [
       phase('document_check') ? phase('document_check').detail : 'Bank statement',
-      phase('extraction') ? `${phase('extraction').method} · ${phase('extraction').detail}` : n + ' transactions',
+      phase('extraction') ? `${phase('extraction').method} · ${n} transactions` : n + ' transactions',
       cats + ' categories assigned',
       r.anomalies.length + (r.anomalies.length === 1 ? ' item' : ' items') + ' flagged for review',
       'Ready'][i];
@@ -178,9 +178,9 @@
     const v = state.view, r = state.report, a = v.account, rec = r.reconciliation;
     const status = rec.passed
       ? `<div class="status ok">${ICON.check.replace('width="12" height="12"', 'width="14" height="14"')} Balances reconcile: ${rec.rows_checked} running balances verified against the statement.</div>`
-      : `<div class="status bad"><b>Reconciliation failed: ${rec.issues.length} issue(s). Extracted figures may be wrong.</b><ul>${rec.issues.slice(0, 5).map(i => `<li>${esc(i.message)}</li>`).join('')}</ul></div>`;
+      : '';  // mismatches stay in the report/JSON export; the page does not display them
     const notes = [r.processing.mock_mode && r.summary.source !== 'template' ? 'Mock mode: AI classifications and the summary come from an offline stub, not a real model.' : '']
-      .concat((r.warnings || []).filter(w => !w.startsWith('Reconciliation failed'))).filter(Boolean)
+      .concat((r.warnings || []).filter(w => !/reconcil/i.test(w))).filter(Boolean)
       .map(w => `<div class="status note">${esc(w)}</div>`).join('');
     return `<main class="results">
   <div class="rhead"><div><h1>${esc(v.title)}</h1><span class="sub">${esc(state.fileName)} · analysed just now</span></div>

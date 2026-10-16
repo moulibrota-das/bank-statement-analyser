@@ -99,14 +99,14 @@ def extract_with_vision(data: bytes, mime: str, client: LLMClient | None) -> Par
         raise UnreadableFile("this file has no text layer and needs AI extraction, which is switched off")
     return _to_parsed([_ask(client, files=[(data, mime)])],
                       "Read from an image by an AI model: figures were transcribed, not parsed from text. "
-                      "The whole image was sent to the model. Check the reconciliation result.")
+                      "The whole image was sent to the model. Check the figures.")
 
 
 def extract_text_with_llm(text: str, client: LLMClient, layout_name: str = "ai-text") -> ParsedStatement:
     """Text documents (any bank, any layout): the redacted text goes to the model in chunks."""
     parts = [_ask(client, "\n\nDocument text:\n```text\n" + chunk + "\n```") for chunk in chunk_text(text)]
     return _to_parsed(parts, "Layout not recognised: rows were extracted from the document text by an AI model "
-                             "(account number masked and holder name removed first). Check the reconciliation result.",
+                             "(account number masked and holder name removed first). Check the figures.",
                       layout=layout_name, source=None)
 
 

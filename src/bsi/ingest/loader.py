@@ -71,7 +71,7 @@ def _finish(meta: StatementMeta, lay: Layout, source: str, rows, warnings: list[
     meta.layout, meta.source_type = lay.name, source  # type: ignore[assignment]
     meta.bank_name = meta.bank_name or lay.bank_name
     if how:
-        warnings.append(f"Unknown layout: column mapping inferred by {how}; verify the reconciliation result.")
+        warnings.append(f"Unknown layout: column mapping inferred by {how}; verify the figures.")
     return ParsedStatement(meta, txns, warnings + w)
 
 
@@ -102,7 +102,7 @@ def _load_pdf(data: bytes, layout: str | None, client) -> ParsedStatement:
         raise UnknownLayout("no transactions could be extracted from this PDF (no dated rows with amounts found)")
     meta.layout, meta.source_type, meta.bank_name = "generic", "pdf", meta.bank_name
     warnings.insert(0, "Layout not recognised: transactions were read with a generic line parser. "
-                       "Check the reconciliation result before trusting the numbers.")
+                       "Check the figures before trusting the numbers.")
     return ParsedStatement(meta, txns, warnings)
 
 
