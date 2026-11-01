@@ -9,7 +9,7 @@ ROOT = Path(__file__).resolve().parents[2]
 
 
 class Settings(BaseSettings):
-    model_config = SettingsConfigDict(env_prefix="BSI_", env_file=".env", extra="ignore")
+    model_config = SettingsConfigDict(env_prefix="BSI_", env_file=".env", env_ignore_empty=True, extra="ignore")
 
     gemini_api_key: str = Field("", validation_alias=AliasChoices("GEMINI_API_KEY", "GOOGLE_API_KEY"))
     llm_model: str = "gemini-2.5-flash"
